@@ -2,6 +2,7 @@ import requests
 import datetime
 from dicttoxml import dicttoxml
 
+
 class IikoClient:
 
     host: str = None
@@ -56,9 +57,9 @@ class IikoClient:
     "---------------------------------------------Общая сумма кассы--------------------------------------------------------------------------------------------------"
 
     def casshift_sum_report(self, actualdate):
-
-        actualdate = date.today()
-        str_date = actualdate.strftime("YYYY-MM-DD")
+        next_date = actualdate + 1
+        str_date = actualdate + 'T23:59:59.999+06:00'
+        n_date = next_date + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <entities-version>20531613</entities-version>
@@ -98,7 +99,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" % (str_date)
+</args>""" % (str_date, next_date)
         headers = {
 
             'Content-Type': 'text/xml',
@@ -121,8 +122,9 @@ class IikoClient:
     "--------------------------------------------Сумма кассы по аггрегаторам-----------------------------------------------------------------------------------------------"
 
     def casshift_by_aggregators(self, actualdate):
-        actualdate = date.today()
-        str_date = actualdate.strftime("YYYY-MM-DD")
+        next_date = actualdate + 1
+        str_date = actualdate + 'T23:59:59.999+06:00'
+        n_date = next_date + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
         <args>
             <entities-version>19980005</entities-version>
@@ -146,7 +148,7 @@ class IikoClient:
             <filters>
                 <k>SessionID.OperDay</k>
                 <v cls="FilterDateRangeCriteria">
-                    <periodType>CURRENT_MONTH</periodType>
+                    <periodType>CUSTOM</periodType>
                     <from cls="java.util.Date">%s</from>
                     <to cls="java.util.Date">%s</to>
                     <includeLow>true</includeLow>
@@ -165,7 +167,7 @@ class IikoClient:
                     </values>
                 </v>
             </filters>
-        </args>""" % (str_date)
+        </args>""" % (str_date, next_date)
         headers = {
 
             'Content-Type': 'text/xml',
@@ -189,8 +191,9 @@ class IikoClient:
     "------------------------------------------------------Себестоимость-----------------------------------------------------------------------------------------------"
 
     def cost_price(self, actualdate):
-        actualdate = date.today()
-        str_date = actualdate.strftime("YYYY-MM-DD")
+        next_date = actualdate + 1
+        str_date = actualdate + 'T23:59:59.999+06:00'
+        n_date = next_date + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <entities-version>20470108</entities-version>
@@ -230,7 +233,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" % (str_date)
+</args>""" % (str_date, next_date)
         headers = {
 
             'Content-Type': 'text/xml',
@@ -255,23 +258,24 @@ class IikoClient:
     "-----------------------------------------------------------Инвентеризация----------------------------------------------------------------------------------------------"
 
     def storage_check(self, actualdate):
-        actualdate = date.today()
-        str_date = actualdate.strftime("YYYY-MM-DD")
+        next_date = actualdate + 1
+        str_date = actualdate + 'T23:59:59.999+06:00'
+        n_date = next_date + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
-    <entities-version>20465128</entities-version>
+    <entities-version>20691806</entities-version>
     <client-type>BACK</client-type>
     <enable-warnings>false</enable-warnings>
-    <client-call-id>12257b40-1366-448f-bf66-f34f1356855d</client-call-id>
-    <license-hash>1120827031</license-hash>
-    <restrictions-state-hash>9441</restrictions-state-hash>
-    <obtained-license-connections-ids>df254ac2-335b-4b1a-9059-36001ee09206</obtained-license-connections-ids>
+    <client-call-id>1c89bded-da56-45c6-b042-1e69b64bc044</client-call-id>
+    <license-hash>-1204008798</license-hash>
+    <restrictions-state-hash>16434</restrictions-state-hash>
+    <obtained-license-connections-ids>e0689d2e-4fe8-4f6e-9160-dd1f685e6f3d</obtained-license-connections-ids>
     <request-watchdog-check-results>true</request-watchdog-check-results>
     <use-raw-entities>true</use-raw-entities>
     <dateFrom>%s</dateFrom>
     <dateTo>%s</dateTo>
     <docType>INCOMING_INVENTORY</docType>
-</args>""" % (str_date)
+</args>""" % (str_date, next_date)
         headers = {
 
             'Content-Type': 'text/xml',
@@ -294,13 +298,12 @@ class IikoClient:
     "--------------------------------------------------------------Явки----------------------------------------------------------------------------------------------------"
 
     def employee_check(self, actualdate):
-        actualdate = date.today()
-        str_date = actualdate.strftime("YYYY-MM-DD")
+        next_date = actualdate + 1
+        str_date = actualdate + 'T23:59:59.999+06:00'
+        n_date = next_date + 'T23:59:59.999+06:00'
 
         try:
-            response = requests.get(self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (
-            str_date, str_date, self.token
-        )
+            response = requests.get(self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (str_date, next_date, self.token)
             return response.content
         except Exception as e:
             return repr(e)

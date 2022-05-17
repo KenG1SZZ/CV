@@ -10,7 +10,7 @@ import time
 from iiko_client import IikoClient
 
 conn = connector.connect(user='root',
-                         password='asdbkb123321',
+                         password='erlan1990e',
                          host='127.0.0.1',
                          database='daily_report',
                          auth_plugin='mysql_native_password')
@@ -28,25 +28,25 @@ conn = connector.connect(user='root',
 
 
 IIKO_URL = 'https://bahandi-co.iiko.it/resto/api'
-IIKO_LOGIN = 'BB_Salary'
-IIKO_PASSWORD = 'a2db784ded68d5a827b2c3690e9fa5131eedf322'
+IIKO_LOGIN = 'Keng1'
+IIKO_PASSWORD = '37a7d5806f9d502b67bc96109eaa91918ac1d53b'
 
 
 iiko_cleint = IikoClient(IIKO_LOGIN, IIKO_PASSWORD, IIKO_URL)
 todaydate = date.today() - timedelta(days=1)
-str_date = todaydate.strftime("%d.%m.%Y")
+str_date = todaydate.strftime("%Y-%m-%d")
 
-consumption = iiko_cleint.get_consumption(str_date, str_date)
-get_sales = iiko_cleint.sales(str_date, str_date)
-get_avg = iiko_cleint.avg_inv(str_date, str_date)
-get_sum = iiko_cleint.allsum(str_date, str_date)
-get_com = iiko_cleint.take_com(str_date, str_date)
+overall_sales = iiko_cleint.casshift_sum_report(str_date)
+aggr_sales = iiko_cleint.casshift_by_aggregators(str_date)
+price_cost = iiko_cleint.cost_price(str_date)
+str_items = iiko_cleint.storage_check(str_date)
+empl_shift = iiko_cleint.employee_check(str_date)
 
-parse_sum = ET.fromstring(get_sum)
-parse_c = ET.fromstring(consumption)
-parse_sales = ET.fromstring(get_sales)
-parse_avg = ET.fromstring(get_avg)
-parse_com = ET.fromstring(get_com)
+parse_overs = ET.fromstring(overall_sales)
+parse_avgs = ET.fromstring(aggr_sales)
+parse_pcost = ET.fromstring(price_cost)
+parse_items = ET.fromstring(str_items)
+parse_empls = ET.fromstring(empl_shift)
 
 
 data_sum = parse_sum.findall('r/DishDiscountSumInt')
