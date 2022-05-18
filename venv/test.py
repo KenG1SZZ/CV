@@ -49,15 +49,9 @@ parse_items = ET.fromstring(str_items)
 parse_empls = ET.fromstring(empl_shift)
 
 
-data_sum = parse_sum.findall('r/DishDiscountSumInt')
-prod_id = parse_com.findall('r/product')
-supplier = parse_com.findall('r/supplier')
-amount = parse_com.findall('r/amount')
-prod_price = parse_c.findall('r/price')
-prod_sum = parse_c.findall('r/sum')
-data_avg = parse_avg.findall('r/DishDiscountSumInt.average')
-com_data = parse_prc.findall('')
-orderdata = parse_sales.findall('r/UniqOrderId.OrdersCount')
+data_overs = parse_overs.findall('data')
+
+
 
 orders = orderdata[0].text
 avg_check = data_avg[0].text
