@@ -12,6 +12,7 @@ class IikoClient:
     headers: dict = {}
     token: str = None
 
+
     def __init__(self, host: str, login: str, password: str, version: str, token: str):
 
         self.host = host
@@ -21,45 +22,21 @@ class IikoClient:
         self.headers = {
             'X-Resto-LoginName': login,
             'X-Resto-PasswordHash': password,
-            'X-Resto-BackVersion': version,
+            'X-Resto-BackVersion': '',
             'X-Resto-AuthType': 'BACK',
             'X-Resto-ServerEdition': 'IIKO_CHAIN',
             'Host': host.replace('http://', '').replace('https://', ''),
             'Content-Type': 'application/xml',
             'Content-Length': '875'
         }
-        if token:
-            self.token
-        else:
-            self.auth()
+        self.token = token
 
-    def auth(self):
-        try:
-            response = requests.get(self.host + '/resto/api/auth?login=' + self.login + '&pass=' + self.password)
-            self.token = response.text
-        except Exception as e:
-            return repr(e)
-
-    def verify(self):
-        response = requests.get(self.host + '/resto/api/v2/entities/list?rootType=TaxCategory&key' + self.token)
-        if response:
-            return
-        else:
-            self.auth()
-
-    def logout(self):
-        try:
-            response = requests.get(self.host + '/resto/api/logout?key=' + self.token)
-            return response.text
-        except Exception as e:
-            return repr(e)
 
     "---------------------------------------------Общая сумма кассы--------------------------------------------------------------------------------------------------"
 
-    def casshift_sum_report(self, actualdate):
-        next_date = actualdate + 1
-        str_date = actualdate + 'T23:59:59.999+06:00'
-        n_date = next_date + 'T23:59:59.999+06:00'
+    def casshift_sum_report(self, pastdate , actualdate):
+        str_date = pastdate + 'T23:59:59.999+06:00'
+        n_date = actualdate + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <entities-version>20531613</entities-version>
@@ -99,7 +76,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" % (str_date, next_date)
+</args>""" % (str_date, n_date)
         headers = {
 
             'Content-Type': 'text/xml',
@@ -121,10 +98,9 @@ class IikoClient:
             return repr(e)
     "--------------------------------------------Сумма кассы по аггрегаторам-----------------------------------------------------------------------------------------------"
 
-    def casshift_by_aggregators(self, actualdate):
-        next_date = actualdate + 1
-        str_date = actualdate + 'T23:59:59.999+06:00'
-        n_date = next_date + 'T23:59:59.999+06:00'
+    def casshift_by_aggregators(self, pastdate, actualdate):
+        str_date = pastdate + 'T23:59:59.999+06:00'
+        n_date = actualdate + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
         <args>
             <entities-version>19980005</entities-version>
@@ -190,10 +166,9 @@ class IikoClient:
 
     "------------------------------------------------------Себестоимость-----------------------------------------------------------------------------------------------"
 
-    def cost_price(self, actualdate):
-        next_date = actualdate + 1
-        str_date = actualdate + 'T23:59:59.999+06:00'
-        n_date = next_date + 'T23:59:59.999+06:00'
+    def cost_price(self, pastdate, actualdate):
+        str_date = pastdate + 'T23:59:59.999+06:00'
+        n_date = actualdate + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <entities-version>20470108</entities-version>
@@ -257,10 +232,9 @@ class IikoClient:
 
     "-----------------------------------------------------------Инвентеризация----------------------------------------------------------------------------------------------"
 
-    def storage_check(self, actualdate):
-        next_date = actualdate + 1
-        str_date = actualdate + 'T23:59:59.999+06:00'
-        n_date = next_date + 'T23:59:59.999+06:00'
+    def storage_check(self, pastdate, actualdate):
+        str_date = pastdate + 'T23:59:59.999+06:00'
+        n_date = actualdate + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <entities-version>20691806</entities-version>
@@ -297,10 +271,9 @@ class IikoClient:
 
     "--------------------------------------------------------------Явки----------------------------------------------------------------------------------------------------"
 
-    def employee_check(self, actualdate):
-        next_date = actualdate + 1
-        str_date = actualdate + 'T23:59:59.999+06:00'
-        n_date = next_date + 'T23:59:59.999+06:00'
+    def employee_check(self, pastdate, actualdate):
+        str_date = pastdate + 'T23:59:59.999+06:00'
+        n_date = actualdate + 'T23:59:59.999+06:00'
 
         try:
             response = requests.get(self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (str_date, next_date, self.token)

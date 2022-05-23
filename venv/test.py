@@ -8,11 +8,12 @@ import datetime
 from datetime import date, timedelta
 import time
 from iiko_client import IikoClient
+from iiko_auth import IikoServer
 
 conn = connector.connect(user='root',
-                         password='erlan1990e',
-                         host='127.0.0.1',
-                         database='daily_report',
+                         password='erlan1990',
+                         host='localhost',
+                         database='bahandireport',
                          auth_plugin='mysql_native_password')
 
 """ TODO
@@ -31,64 +32,99 @@ IIKO_URL = 'https://bahandi-co.iiko.it/resto/api'
 IIKO_LOGIN = 'Keng1'
 IIKO_PASSWORD = '37a7d5806f9d502b67bc96109eaa91918ac1d53b'
 
+iiko_log = IIkoServer(IIKO_LOGIN, IIKO_PASSWORD, IIKO_URL)
+IIKO_VERSION = iiko_log.get_version()
+IIKO_TOKEN = iiko_log.auth()
 
-iiko_cleint = IikoClient(IIKO_LOGIN, IIKO_PASSWORD, IIKO_URL)
+iiko_cleint = IikoClient(IIKO_LOGIN, IIKO_PASSWORD, IIKO_URL, IIKO_VERSION, IIKO_TOKEN)
 todaydate = date.today() - timedelta(days=1)
+nextdate = date.today()
 str_date = todaydate.strftime("%Y-%m-%d")
+strn_date = nextdate.strftime("%Y-%m-%d")
 
-overall_sales = iiko_cleint.casshift_sum_report(str_date)
-aggr_sales = iiko_cleint.casshift_by_aggregators(str_date)
-price_cost = iiko_cleint.cost_price(str_date)
-str_items = iiko_cleint.storage_check(str_date)
-empl_shift = iiko_cleint.employee_check(str_date)
+def get_oversales ():
 
-parse_overs = ET.fromstring(overall_sales)
-parse_avgs = ET.fromstring(aggr_sales)
-parse_pcost = ET.fromstring(price_cost)
-parse_items = ET.fromstring(str_items)
-parse_empls = ET.fromstring(empl_shift)
+    overall_sales = iiko_cleint.casshift_sum_report(str_date)
+    parse_overs = ET.fromstring(overall_sales)
+    data_overs = parse_overs.findall('date')
 
+    for i in data_overs:
+        date = i.find('v/cls=java.util.Date типо такого')
+        department = i.find('v/cls=java.lang.String')
+        cash_sum = i.find('v/cls=java.math.BigDecimal')
+    table = """INSERT INTO overall_sales(date,department,cash_sum) VALUES(%s,%s,%s)"""
 
-data_overs = parse_overs.findall('data')
+    for i in table:
+        c = conn.cursor()
+        c.execute(table, (date, department, cash_sum))
+        conn.commit()
+def get_aggrsales ():
 
+    aggr_sales = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
+    parse_aggr = ET.fromstring(aggr_sales)
+    data_aggr = parse_aggr.findall('date')
 
+    for i in data_aggr:
+        date = i.find('v/cls=java.util.Date типо такого')
+        department = i.find('k department v/cls=java.lang.String')
+        paytype = i.find('k paytype v/cls=java.lang.String')
+        cash_sum = i.find('v/cls=java.lang.BigDecimal')
+    table = """INSERT INTO overall_sales(date,department,cash_sum) VALUES(%s,%s,%s)"""
 
-orders = orderdata[0].text
-avg_check = data_avg[0].text
-cash_sum = data_sum[0].text
-pr_id = data_prc[0].text
-pr_amount = amount[0].text
-pr_price = prod_price[0].text
-pr_supplier = supplier[0].text
+    for i in table:
+        c = conn.cursor()
+        c.execute(table, (date, department, cash_sum))
+        conn.commit()
 
-#print(iiko_cleint.get_consumption('6fa71809-7b0e-44ae-aa79-62d44a75d32e', str_ydate, str_date))
-#print(data_c)
-#print(cash_sum)
-#print(avg_check)
-for ep in data_c:
-     t_date = ep.find('date')
-     f_date = datetime.datetime.strptime(t_date.text,"%d.%m.%Y").strftime("%Y-%m-%d")
-     productName = ep.find('productName').text
-     productId = ep.find('productId').text
-     value = float(ep.find('value').text)
-     inted_v = value
-     # print(productName)
-     data = """INSERT INTO cons_by_sales(date,productName,productId,value) VALUES(%s,%s,%s,%s)"""
+def get_pricecost ():
 
-for i in data:
-     #print("asdf")
-#data = """SELECT * from cons_by_sales"""
-     c = conn.cursor()
-     c.execute(data, (f_date, productName, productId, inted_v))
-     conn.commit()
+    price_cost = iiko_cleint.cost_price(str_date, strn_date)
+    parse_pcost = ET.fromstring(price_cost)
+    data_overs = parse_pcost.findall('date')
 
-# for i in orderdata:
-#     orders = i.find('').text
-#     print(orders)
+    for i in data_overs:
+        date = i.find('v/cls=java.util.Date типо такого')
+        department = i.find('v/cls=java.lang.String')
 
+        cash_sum = i.find('v/cls=java.math.BigDecimal')
+    table = """INSERT INTO overall_sales(date,department,cash_sum) VALUES(%s,%s,%s)"""
 
+    for i in table:
+        c = conn.cursor()
+        c.execute(table, (date, department, cash_sum))
+        conn.commit()
 
+def get_storeitems():
+    overall_sales = iiko_cleint.casshift_sum_report(str_date, strn_date)
+    parse_overs = ET.fromstring(overall_sales)
+    data_overs = parse_overs.findall('date')
 
+    for i in data_overs:
+        date = i.find('v/cls=java.util.Date типо такого')
+        department = i.find('v/cls=java.lang.String')
+        cash_sum = i.find('v/cls=java.math.BigDecimal')
+    table = """INSERT INTO overall_sales(date,department,cash_sum) VALUES(%s,%s,%s)"""
+
+    for i in table:
+        c = conn.cursor()
+        c.execute(table, (date, department, cash_sum))
+        conn.commit()
+
+def get_emplshift ():
+    overall_sales = iiko_cleint.casshift_sum_report(str_date, strn_date)
+    parse_overs = ET.fromstring(overall_sales)
+    data_overs = parse_overs.findall('date')
+
+    for i in data_overs:
+        date = i.find('v/cls=java.util.Date типо такого')
+        department = i.find('v/cls=java.lang.String')
+        cash_sum = i.find('v/cls=java.math.BigDecimal')
+    table = """INSERT INTO overall_sales(date,department,cash_sum) VALUES(%s,%s,%s)"""
+
+    for i in table:
+        c = conn.cursor()
+        c.execute(table, (date, department, cash_sum))
+        conn.commit()
     #creating the cursor object
 
 
