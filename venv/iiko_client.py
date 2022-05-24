@@ -171,17 +171,15 @@ class IikoClient:
         n_date = actualdate + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
-    <entities-version>20470108</entities-version>
     <client-type>BACK</client-type>
     <enable-warnings>false</enable-warnings>
-    <client-call-id>65632738-fdd3-4b53-9936-dcd04ff256d3</client-call-id>
-    <license-hash>1120827031</license-hash>
-    <restrictions-state-hash>9607</restrictions-state-hash>
-    <obtained-license-connections-ids>4240e280-ff48-41c0-a245-5ddadf581648</obtained-license-connections-ids>
+    <obtained-license-connections-ids>c21bf0a8-6384-4fa5-ad8c-8a24136c3591</obtained-license-connections-ids>
     <request-watchdog-check-results>true</request-watchdog-check-results>
     <use-raw-entities>true</use-raw-entities>
     <olapReportType>SALES</olapReportType>
-    <groupByRowFields cls="java.util.ArrayList" />
+    <groupByRowFields cls="java.util.ArrayList">
+        <i>Department</i>
+    </groupByRowFields>
     <groupByColFields cls="java.util.ArrayList" />
     <aggregateFields cls="java.util.ArrayList">
         <i>ProductCostBase.ProductCost</i>
@@ -190,8 +188,8 @@ class IikoClient:
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
             <periodType>CUSTOM</periodType>
-            <from cls="java.util.Date">2022-05-10T00:00:00.000+06:00</from>
-            <to cls="java.util.Date">2022-05-12T00:00:00.000+06:00</to>
+            <from cls="java.util.Date">%s</from>
+            <to cls="java.util.Date">%s</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
