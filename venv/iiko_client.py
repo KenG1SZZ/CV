@@ -4,14 +4,12 @@ from dicttoxml import dicttoxml
 
 
 class IikoClient:
-
     host: str = None
     login: str = None
     password: str = None
     version: str = None
     headers: dict = {}
     token: str = None
-
 
     def __init__(self, host: str, login: str, password: str, version: str, token: str):
 
@@ -31,10 +29,9 @@ class IikoClient:
         }
         self.token = token
 
-
     "---------------------------------------------Общая сумма кассы--------------------------------------------------------------------------------------------------"
 
-    def casshift_sum_report(self, pastdate , actualdate):
+    def casshift_sum_report(self, pastdate, actualdate):
         str_date = pastdate + 'T23:59:59.999+06:00'
         n_date = actualdate + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
@@ -88,7 +85,6 @@ class IikoClient:
             'Host': 'bahandi-co.iiko.it',
             'Accept-Encoding': 'gzip',
             'Connection': 'Close'
-            
 
         }
         try:
@@ -97,12 +93,13 @@ class IikoClient:
             return response.content
         except Exception as e:
             return repr(e)
+
     "--------------------------------------------Сумма кассы по аггрегаторам-----------------------------------------------------------------------------------------------"
 
     def casshift_by_aggregators(self, pastdate, actualdate):
         str_date = pastdate + 'T23:59:59.999+06:00'
         n_date = actualdate + 'T23:59:59.999+06:00'
-        payload = """﻿<?xml version="1.0" encoding="utf-8"?>
+        payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <entities-version>21772951</entities-version>
     <client-type>BACK</client-type>
@@ -164,7 +161,6 @@ class IikoClient:
             return response.content
         except Exception as e:
             return repr(e)
-
 
     "------------------------------------------------------Себестоимость-----------------------------------------------------------------------------------------------"
 
@@ -231,8 +227,6 @@ class IikoClient:
         except Exception as e:
             return repr(e)
 
-
-
     "-----------------------------------------------------------Инвентеризация----------------------------------------------------------------------------------------------"
 
     def storage_check(self, pastdate, actualdate):
@@ -279,8 +273,9 @@ class IikoClient:
         n_date = actualdate + 'T23:59:59.999+06:00'
 
         try:
-            response = requests.get(self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (str_date, next_date, self.token)
+            response = requests.get(
+                self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (
+                       str_date, next_date, self.token)
             return response.content
         except Exception as e:
             return repr(e)
-
