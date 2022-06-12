@@ -1,19 +1,23 @@
 import requests
 from lxml import etree
 from io import StringIO
+
+
 class IikoServer:
 
     def __init__(self, host: str, login: str, password: str):
         self.host = host
         self.login = login
         self.password = password
+        self.token = None
 
     def get_version(self):
 
         try:
             ver = requests.get(
-                self.host + 'get_server_info.jsp?encoding=UTF-8')
-            tree = etree.parse(StringIO(ver))
+                  self.host + '/resto/get_server_info.jsp?encoding=UTF-8')
+            strgln = ver.text
+            tree = etree.parse(StringIO(strgln))
             version = ''.join(tree.xpath(r'//version/text()'))
             return version
 

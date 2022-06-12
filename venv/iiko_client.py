@@ -54,6 +54,7 @@ class IikoClient:
     <aggregateFields cls="java.util.ArrayList">
         <i>DishSumInt</i>
     </aggregateFields>
+    
     <filters>
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
@@ -101,49 +102,50 @@ class IikoClient:
     def casshift_by_aggregators(self, pastdate, actualdate):
         str_date = pastdate + 'T23:59:59.999+06:00'
         n_date = actualdate + 'T23:59:59.999+06:00'
-        payload = """<?xml version="1.0" encoding="utf-8"?>
-        <args>
-            <entities-version>19980005</entities-version>
-            <client-type>BACK</client-type>
-            <enable-warnings>false</enable-warnings>
-            <client-call-id>d9153d72-9a1d-452b-81a9-21375f87d87b</client-call-id>
-            <license-hash>776916167</license-hash>
-            <restrictions-state-hash>3040</restrictions-state-hash>
-            <obtained-license-connections-ids>8bf2d3e1-9792-4d6a-9673-c0f1da8cc107</obtained-license-connections-ids>
-            <request-watchdog-check-results>true</request-watchdog-check-results>
-            <use-raw-entities>true</use-raw-entities>
-            <olapReportType>SALES</olapReportType>
-            <groupByRowFields cls="java.util.ArrayList">
-                <i>Department</i>
-                <i>PayTypes</i>
-            </groupByRowFields>
-            <groupByColFields cls="java.util.ArrayList" />
-            <aggregateFields cls="java.util.ArrayList">
-                <i>DishSumInt</i>
-            </aggregateFields>
-            <filters>
-                <k>SessionID.OperDay</k>
-                <v cls="FilterDateRangeCriteria">
-                    <periodType>CUSTOM</periodType>
-                    <from cls="java.util.Date">%s</from>
-                    <to cls="java.util.Date">%s</to>
-                    <includeLow>true</includeLow>
-                    <includeHigh>false</includeHigh>
-                </v>
-                <k>DeletedWithWriteoff</k>
-                <v cls="FilterIncludeValuesCriteria">
-                    <values>
-                        <i cls="DishDeletionStatus">NOT_DELETED</i>
-                    </values>
-                </v>
-                <k>OrderDeleted</k>
-                <v cls="FilterIncludeValuesCriteria">
-                    <values>
-                        <i cls="OrderDeletionStatus">NOT_DELETED</i>
-                    </values>
-                </v>
-            </filters>
-        </args>""" % (str_date, next_date)
+        payload = """﻿<?xml version="1.0" encoding="utf-8"?>
+<args>
+    <entities-version>21772951</entities-version>
+    <client-type>BACK</client-type>
+    <enable-warnings>false</enable-warnings>
+    <client-call-id>ae7ea071-adab-41c2-8435-ce7368e201b8</client-call-id>
+    <license-hash>-261807956</license-hash>
+    <restrictions-state-hash>18295</restrictions-state-hash>
+    <obtained-license-connections-ids>7557e22d-4a2a-4985-938a-225d3eb3faf1</obtained-license-connections-ids>
+    <request-watchdog-check-results>true</request-watchdog-check-results>
+    <use-raw-entities>true</use-raw-entities>
+    <olapReportType>SALES</olapReportType>
+    <groupByRowFields cls="java.util.ArrayList">
+        <i>Department</i>
+        <i>OpenDate.Typed</i>
+        <i>PayTypes</i>
+    </groupByRowFields>
+    <groupByColFields cls="java.util.ArrayList"/>
+    <aggregateFields cls="java.util.ArrayList">
+        <i>DishSumInt</i>
+    </aggregateFields>
+    <filters>
+        <k>SessionID.OperDay</k>
+        <v cls="FilterDateRangeCriteria">
+            <periodType>CURRENT_MONTH</periodType>
+            <from cls="java.util.Date">2022-06-01T00:00:00.000+06:00</from>
+            <to cls="java.util.Date">2022-07-01T00:00:00.000+06:00</to>
+            <includeLow>true</includeLow>
+            <includeHigh>false</includeHigh>
+        </v>
+        <k>DeletedWithWriteoff</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="DishDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+        <k>OrderDeleted</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="OrderDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+    </filters>
+</args>""" % (str_date, next_date)
         headers = {
 
             'Content-Type': 'text/xml',
