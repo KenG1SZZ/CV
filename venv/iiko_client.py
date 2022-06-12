@@ -143,7 +143,7 @@ class IikoClient:
                     </values>
                 </v>
             </filters>
-        </args>""" % (str_date, next_date)
+        </args>""" % (str_date, n_date)
         headers = {
 
             'Content-Type': 'text/xml',
@@ -158,7 +158,8 @@ class IikoClient:
         }
         try:
             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
-                                     headers=self.headers, data=payload)
+                                     headers = self.headers, data = payload)
+            print(response.content)
             return response.content
         except Exception as e:
             return repr(e)
@@ -209,7 +210,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" % (str_date, next_date)
+</args>""" % (str_date, n_date)
         headers = {
 
             'Content-Type': 'text/xml',
@@ -250,7 +251,7 @@ class IikoClient:
     <dateFrom>%s</dateFrom>
     <dateTo>%s</dateTo>
     <docType>INCOMING_INVENTORY</docType>
-</args>""" % (str_date, next_date)
+</args>""" % (str_date, n_date)
         headers = {
 
             'Content-Type': 'text/xml',
@@ -277,7 +278,7 @@ class IikoClient:
         n_date = actualdate + 'T23:59:59.999+06:00'
 
         try:
-            response = requests.get(self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (str_date, next_date, self.token)
+            response = requests.get(self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (str_date, n_date, self.token)
             return response.content
         except Exception as e:
             return repr(e)

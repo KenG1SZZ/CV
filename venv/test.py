@@ -28,15 +28,15 @@ conn = connector.connect(user='root',
 """
 
 
-IIKO_URL = 'https://bahandi-co.iiko.it/resto/api'
+IIKO_URL = 'https://bahandi-co.iiko.it'
 IIKO_LOGIN = 'Keng1'
 IIKO_PASSWORD = '37a7d5806f9d502b67bc96109eaa91918ac1d53b'
 
-iiko_log = IikoServer(IIKO_LOGIN, IIKO_PASSWORD, IIKO_URL)
+iiko_log = IikoServer(IIKO_URL, IIKO_PASSWORD, IIKO_LOGIN)
 IIKO_VERSION = iiko_log.get_version()
 IIKO_TOKEN = iiko_log.auth()
 
-iiko_cleint = IikoClient(IIKO_LOGIN, IIKO_PASSWORD, IIKO_URL, IIKO_VERSION, IIKO_TOKEN)
+iiko_cleint = IikoClient(IIKO_URL, IIKO_LOGIN, IIKO_PASSWORD, IIKO_VERSION, IIKO_TOKEN)
 todaydate = date.today() - timedelta(days=1)
 nextdate = date.today()
 str_date = todaydate.strftime("%Y-%m-%d")
@@ -71,20 +71,18 @@ def get_aggrsales ():
     aggr_sales = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
     parse_aggr = ET.fromstring(aggr_sales)
     data_aggr = parse_aggr.findall('date')
-
-    from xml.etree import ElementTree as ET
-    tree = ET.parse("doc.xml")
-    root = tree.getroot()
-    for et in root.iter("i"):
+    table = """INSERT INTO aggr_sales(department,cash_sum,paytype) VALUES(%s,%s,%s)"""
+    for et in data_aggr.iter("i"):
         if len(data := et.findall("v")) == 3:
             department, cash_sum, paytype = (x.text for x in data)
+            for i in table:
+                c = conn.cursor()
+                c.execute(table, (department, cash_sum, paytype))
+                conn.commit()
 
-    table = """INSERT INTO aggr_sales(department,cash_sum,paytype) VALUES(%s,%s,%s)"""
 
-    for i in table:
-        c = conn.cursor()
-        c.execute(table, (department, cash_sum, paytype))
-        conn.commit()
+
+
 
 # def get_pricecost ():
 #
