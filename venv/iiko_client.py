@@ -102,48 +102,49 @@ class IikoClient:
         str_date = pastdate + 'T23:59:59.999+06:00'
         n_date = actualdate + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
-        <args>
-            <entities-version>19980005</entities-version>
-            <client-type>BACK</client-type>
-            <enable-warnings>false</enable-warnings>
-            <client-call-id>d9153d72-9a1d-452b-81a9-21375f87d87b</client-call-id>
-            <license-hash>776916167</license-hash>
-            <restrictions-state-hash>3040</restrictions-state-hash>
-            <obtained-license-connections-ids>8bf2d3e1-9792-4d6a-9673-c0f1da8cc107</obtained-license-connections-ids>
-            <request-watchdog-check-results>true</request-watchdog-check-results>
-            <use-raw-entities>true</use-raw-entities>
-            <olapReportType>SALES</olapReportType>
-            <groupByRowFields cls="java.util.ArrayList">
-                <i>Department</i>
-                <i>PayTypes</i>
-            </groupByRowFields>
-            <groupByColFields cls="java.util.ArrayList" />
-            <aggregateFields cls="java.util.ArrayList">
-                <i>DishSumInt</i>
-            </aggregateFields>
-            <filters>
-                <k>SessionID.OperDay</k>
-                <v cls="FilterDateRangeCriteria">
-                    <periodType>CUSTOM</periodType>
-                    <from cls="java.util.Date">%s</from>
-                    <to cls="java.util.Date">%s</to>
-                    <includeLow>true</includeLow>
-                    <includeHigh>false</includeHigh>
-                </v>
-                <k>DeletedWithWriteoff</k>
-                <v cls="FilterIncludeValuesCriteria">
-                    <values>
-                        <i cls="DishDeletionStatus">NOT_DELETED</i>
-                    </values>
-                </v>
-                <k>OrderDeleted</k>
-                <v cls="FilterIncludeValuesCriteria">
-                    <values>
-                        <i cls="OrderDeletionStatus">NOT_DELETED</i>
-                    </values>
-                </v>
-            </filters>
-        </args>""" % (str_date, n_date)
+<args>
+    <entities-version>21794400</entities-version>
+    <client-type>BACK</client-type>
+    <enable-warnings>false</enable-warnings>
+    <client-call-id>a08547a4-1249-40ed-961e-2b8ebb93ca5c</client-call-id>
+    <license-hash>-261807956</license-hash>
+    <restrictions-state-hash>18947</restrictions-state-hash>
+    <obtained-license-connections-ids>da370e44-0a82-438d-85f2-c9dd7b35fac8</obtained-license-connections-ids>
+    <request-watchdog-check-results>true</request-watchdog-check-results>
+    <use-raw-entities>true</use-raw-entities>
+    <olapReportType>SALES</olapReportType>
+    <groupByRowFields cls="java.util.ArrayList">
+        <i>OpenDate.Typed</i>
+        <i>Department</i>
+        <i>PayTypes</i>
+    </groupByRowFields>
+    <groupByColFields cls="java.util.ArrayList"/>
+    <aggregateFields cls="java.util.ArrayList">
+        <i>DishSumInt</i>
+    </aggregateFields>
+    <filters>
+        <k>SessionID.OperDay</k>
+        <v cls="FilterDateRangeCriteria">
+            <periodType>LAST_MONTH</periodType>
+            <from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
+            <to cls="java.util.Date">2022-06-01T00:00:00.000+06:00</to>
+            <includeLow>true</includeLow>
+            <includeHigh>false</includeHigh>
+        </v>
+        <k>DeletedWithWriteoff</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="DishDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+        <k>OrderDeleted</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="OrderDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+    </filters>
+</args>""" % (str_date, n_date)
         headers = {
 
             'Content-Type': 'text/xml',

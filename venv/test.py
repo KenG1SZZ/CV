@@ -71,14 +71,14 @@ def get_aggrsales ():
     aggr_sales = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
     parse_aggr = ET.fromstring(aggr_sales)
     data_aggr = parse_aggr.findall('date')
-    table = """INSERT INTO aggr_sales(department,cash_sum,paytype) VALUES(%s,%s,%s)"""
+    table = """INSERT INTO aggr_sales(date,department,cash_sum,paytype) VALUES(%s,%s,%s,%s)"""
     for et in data_aggr.iter("i"):
-        if len(data := et.findall("v")) == 3:
-            department, cash_sum, paytype = (x.text for x in data)
-            for i in table:
-                c = conn.cursor()
-                c.execute(table, (department, cash_sum, paytype))
-                conn.commit()
+        if len(data := et.findall("v")) == 4:
+            table = """INSERT INTO aggr_sales(date,department,cash_sum,paytype) VALUES(%s,%s,%s,%s)"""
+            date, department, cash_sum, paytype = (x.text for x in data)
+            c = conn.cursor()
+            c.execute(table, (date, department, cash_sum, paytype))
+            conn.commit()
 
 
 
