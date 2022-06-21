@@ -4,14 +4,12 @@ from dicttoxml import dicttoxml
 
 
 class IikoClient:
-
     host: str = None
     login: str = None
     password: str = None
     version: str = None
     headers: dict = {}
     token: str = None
-
 
     def __init__(self, host: str, login: str, password: str, version: str, token: str):
 
@@ -22,7 +20,7 @@ class IikoClient:
         self.headers = {
             'X-Resto-LoginName': login,
             'X-Resto-PasswordHash': password,
-            'X-Resto-BackVersion': '',
+            'X-Resto-BackVersion': version,
             'X-Resto-AuthType': 'BACK',
             'X-Resto-ServerEdition': 'IIKO_CHAIN',
             'Host': host.replace('http://', '').replace('https://', ''),
@@ -31,10 +29,9 @@ class IikoClient:
         }
         self.token = token
 
+    "---------------------------------------------Общая сумма кассы----------------------------------------------------"
 
-    "---------------------------------------------Общая сумма кассы--------------------------------------------------------------------------------------------------"
-
-    def casshift_sum_report(self, pastdate , actualdate):
+    def cashshift_sum_report(self, pastdate, actualdate):
         str_date = pastdate + 'T23:59:59.999+06:00'
         n_date = actualdate + 'T23:59:59.999+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
@@ -58,8 +55,8 @@ class IikoClient:
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
             <periodType>CUSTOM</periodType>
-            <from cls="java.util.Date">%s</from>
-            <to cls="java.util.Date">%s</to>
+            <from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
+            <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
@@ -77,26 +74,15 @@ class IikoClient:
         </v>
     </filters>
 </args>""" % (str_date, n_date)
-        headers = {
 
-            'Content-Type': 'text/xml',
-            'X-Resto-LoginName': 'Keng1',
-            'X-Resto-PasswordHash': '37a7d5806f9d502b67bc96109eaa91918ac1d53b',
-            'X-Resto-BackVersion': '7.9.7013.0',
-            'Accept-Language': 'ru',
-            'Host': 'bahandi-co.iiko.it',
-            'Accept-Encoding': 'gzip',
-            'Connection': 'Close'
-            
-
-        }
         try:
             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
                                      headers=self.headers, data=payload)
             return response.content
         except Exception as e:
             return repr(e)
-    "--------------------------------------------Сумма кассы по аггрегаторам-----------------------------------------------------------------------------------------------"
+
+    "--------------------------------------Сумма кассы по аггрегаторам-------------------------------------------------"
 
     def casshift_by_aggregators(self, pastdate, actualdate):
         str_date = pastdate + 'T23:59:59.999+06:00'
@@ -125,9 +111,9 @@ class IikoClient:
     <filters>
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
-            <periodType>LAST_MONTH</periodType>
+            <periodType>CUSTOM</periodType>
             <from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
-            <to cls="java.util.Date">2022-06-01T00:00:00.000+06:00</to>
+            <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
@@ -144,29 +130,18 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" % (str_date, n_date)
-        headers = {
-
-            'Content-Type': 'text/xml',
-            'X-Resto-LoginName': 'Keng1',
-            'X-Resto-PasswordHash': '37a7d5806f9d502b67bc96109eaa91918ac1d53b',
-            'X-Resto-BackVersion': '7.9.7013.0',
-            'Accept-Language': 'ru',
-            'Host': 'bahandi-co.iiko.it',
-            'Accept-Encoding': 'gzip',
-            'Connection': 'Close'
-
-        }
+</args>"""
+# '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
+#             <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
         try:
             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
-                                     headers = self.headers, data = payload)
-            print(response.content)
+                                     headers=self.headers, data=payload)
+            # print(response.content)
             return response.content
         except Exception as e:
             return repr(e)
 
-
-    "------------------------------------------------------Себестоимость-----------------------------------------------------------------------------------------------"
+    "--------------------------------------Себестоимость-------------------------------------------------"
 
     def cost_price(self, pastdate, actualdate):
         str_date = pastdate + 'T23:59:59.999+06:00'
@@ -193,8 +168,8 @@ class IikoClient:
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
             <periodType>CURRENT_MONTH</periodType>
-            <from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
-            <to cls="java.util.Date">2022-06-01T00:00:00.000+06:00</to>
+            <from cls="java.util.Date">%s</from>
+            <to cls="java.util.Date">%s</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
@@ -212,18 +187,7 @@ class IikoClient:
         </v>
     </filters>
 </args>""" % (str_date, n_date)
-        headers = {
 
-            'Content-Type': 'text/xml',
-            'X-Resto-LoginName': 'Keng1',
-            'X-Resto-PasswordHash': '37a7d5806f9d502b67bc96109eaa91918ac1d53b',
-            'X-Resto-BackVersion': '7.9.7013.0',
-            'Accept-Language': 'ru',
-            'Host': 'bahandi-co.iiko.it',
-            'Accept-Encoding': 'gzip',
-            'Connection': 'Close'
-
-        }
         try:
             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
                                      headers=self.headers, data=payload)
@@ -231,9 +195,7 @@ class IikoClient:
         except Exception as e:
             return repr(e)
 
-
-
-    "-----------------------------------------------------------Инвентеризация----------------------------------------------------------------------------------------------"
+    "--------------------------------------Инвентеризация-------------------------------------------------"
 
     def storage_check(self, pastdate, actualdate):
         str_date = pastdate + 'T23:59:59.999+06:00'
@@ -253,18 +215,7 @@ class IikoClient:
     <dateTo>%s</dateTo>
     <docType>INCOMING_INVENTORY</docType>
 </args>""" % (str_date, n_date)
-        headers = {
 
-            'Content-Type': 'text/xml',
-            'X-Resto-LoginName': 'Keng1',
-            'X-Resto-PasswordHash': '37a7d5806f9d502b67bc96109eaa91918ac1d53b',
-            'X-Resto-BackVersion': '7.9.7013.0',
-            'Accept-Language': 'ru',
-            'Host': 'bahandi-co.iiko.it',
-            'Accept-Encoding': 'gzip',
-            'Connection': 'Close'
-
-        }
         try:
             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
                                      headers=self.headers, data=payload)
@@ -272,15 +223,16 @@ class IikoClient:
         except Exception as e:
             return repr(e)
 
-    "--------------------------------------------------------------Явки----------------------------------------------------------------------------------------------------"
+    "--------------------------------------Явки-------------------------------------------------"
 
     def employee_check(self, pastdate, actualdate):
         str_date = pastdate + 'T23:59:59.999+06:00'
         n_date = actualdate + 'T23:59:59.999+06:00'
 
         try:
-            response = requests.get(self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (str_date, n_date, self.token)
+            response = requests.get(
+                self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (
+                       str_date, n_date, self.token)
             return response.content
         except Exception as e:
             return repr(e)
-

@@ -12,7 +12,6 @@ class IikoServer:
         self.token = None
 
     def get_version(self):
-
         try:
             ver = requests.get(
                   self.host + '/resto/get_server_info.jsp?encoding=UTF-8')
@@ -27,7 +26,8 @@ class IikoServer:
     def auth(self):
         try:
             response = requests.get(self.host + '/resto/api/auth?login=' + self.login + '&pass=' + self.password)
-            self.token = response.text
+            return response.text
+
         except Exception as e:
             return repr(e)
 

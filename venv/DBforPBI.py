@@ -14,7 +14,7 @@ import datetime
 from datetime import date,timedelta
 import logging
 from time import sleep
-import xmltodict
+
 import threading
 import xml.etree.ElementTree as ET
 import mysql.connector
@@ -40,33 +40,34 @@ IIKO_PASSWORD = 'a2db784ded68d5a827b2c3690e9fa5131eedf322'
 token = None
 auth_url = 'https://bahandi-co.iiko.it/resto/api/'
 url = "https://bahandi-co.iiko.it/resto/api/reports/olap?key=4ddcef3c-539b-0767-1dea-651e568ec892&report=SALES&from=21.12.2021&to=21.12.2021&agr=UniqOrderId.OrdersCount&agr=DishDiscountSumInt.average&"
-
-def db_conn ():
-    conn = mysql.connector.connect(user='root',
-                                   password='',
-                                   host='localhost',
-                                   database='database')
-
-    # in our xml file student is the root for all
-    # student data.
-    data2 = tree.findall('student')
-
-    # retrieving the data and insert into table
-    # i value for xml data #j value printing number of
-    # values that are stored
-
-        # sql query to insert data into database
-        data = """INSERT INTO vignan(name,id,department) VALUES(%s,%s,%s)"""
-
-        # creating the cursor object
-        c = conn.cursor()
-
-        # executing cursor object
-        c.execute(data, (name, id, department))
-        conn.commit()
+print('asdfasfdsfa')
+# def db_conn ():
+#     conn = mysql.connector.connect(user='root',
+#                                    password='',
+#                                    host='localhost',
+#                                    database='database')
+#
+#     # in our xml file student is the root for all
+#     # student data.
+#     data2 = tree.findall('student')
+#
+#     # retrieving the data and insert into table
+#     # i value for xml data #j value printing number of
+#     # values that are stored
+#
+#         # # sql query to insert data into database
+#         # data = """INSERT INTO vignan(name,id,department) VALUES(%s,%s,%s)"""
+#
+#         # creating the cursor object
+#         c = conn.cursor()
+#
+#         # executing cursor object
+#         c.execute(data, (name, id, department))
+#         conn.commit()
 
 
 def get_token():
+    print('sdfdsafsafsdfsa')
     url = 'https://bahandi-co.iiko.it/resto/api/auth?login=' + IIKO_LOGIN + '&pass=' + IIKO_PASSWORD
     response = requests.get(url)
     if response.status_code == 200:
@@ -77,8 +78,10 @@ def get_token():
         time.sleep(30)
         token = None
         return None
+
 def get_sales():
     global token
+    print('asdfadsfsafasfsa')
     with open('get_sales.txt', 'a+') as file:
         file.write(datetime.datetime.now().strftime('%H:%M:%S') + 'start function \n')
         todaydate = date.today()
