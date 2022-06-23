@@ -161,11 +161,12 @@ class IikoClient:
         tags = ['documentID', 'date', 'documentSummary', 'storeFrom', 'amount', 'sum', 'surplusSum', 'shortageSum']
         for et in parse.iter("i"):
             if len(data := et.findall(a for a in tags)) == 8:
-                table = """INSERT INTO test(date,department,cash_sum,paytype) VALUES(%s,%s,%s,%s)"""
-                date, department, cash_sum, paytype = (x.text for x in data)
-                print(date, department, cash_sum, paytype)
+                table = """INSERT INTO test(doc_id, date, doc, store, amount, sum, surplus, shortage) VALUES(%s,%s,
+                %s,%s,%s,%s,%s,%s) """
+                doc_id, date, doc, store, amount, sum, surplus, shortage = (x.text for x in data)
+                print(doc_id, date, doc, store, amount, sum, surplus, shortage)
                 c = conn.cursor()
-                c.execute(table, (date, department, cash_sum, paytype))
+                c.execute(table, (doc_id, date, doc, store, amount, sum, surplus, shortage))
                 conn.commit()
 
     "--------------------------------------Явки-------------------------------------------------"
