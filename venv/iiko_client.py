@@ -150,24 +150,30 @@ class IikoClient:
     <obtained-license-connections-ids>df254ac2-335b-4b1a-9059-36001ee09206</obtained-license-connections-ids>
     <request-watchdog-check-results>true</request-watchdog-check-results>
     <use-raw-entities>true</use-raw-entities>
-    <dateFrom>2022-05-01T00:00:00.000+06:00</dateFrom>
-    <dateTo>2022-06-01T00:00:00.000+06:00</dateTo>
+    <dateFrom>2022-06-01T00:00:00.000+06:00</dateFrom>
+    <dateTo>2022-06-22T00:00:00.000+06:00</dateTo>
     <docType>INCOMING_INVENTORY</docType>
 </args>"""
         # % (str_date, n_date)
         response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
                                  headers=self.headers, data=payload)
         parse = ET.fromstring(response.content)
-        tags = ['documentID', 'date', 'documentSummary', 'storeFrom', 'amount', 'sum', 'surplusSum', 'shortageSum']
-        for et in parse.iter("i"):
-            if len(data := et.findall(a for a in tags)) == 8:
-                table = """INSERT INTO test(doc_id, date, doc, store, amount, sum, surplus, shortage) VALUES(%s,%s,
-                %s,%s,%s,%s,%s,%s) """
-                doc_id, date, doc, store, amount, sum, surplus, shortage = (x.text for x in data)
-                print(doc_id, date, doc, store, amount, sum, surplus, shortage)
-                c = conn.cursor()
-                c.execute(table, (doc_id, date, doc, store, amount, sum, surplus, shortage))
-                conn.commit()
+        parse_str = parse.find('returnValue')
+        for i in parse_str.iter("i"):
+            doc_id = i.find('documentID').text
+            date = i.find('date').text
+            doc = i.find('documentSummary').text
+            store = i.find('storeFrom').text
+            amount = i.find('amount').text
+            sum = i.find('sum').text
+            surplus = i.find('surplusSum').text
+            shortage = i.find('shortageSum').text
+            print(doc_id, date, doc, store, amount, sum, surplus, shortage)
+            table: str = """INSERT INTO test(doc_id, date, doc, store_id, amount, sum, surplus, shortage) VALUES(%s,%s,
+            %s,%s,%s,%s,%s,%s) """
+            c = conn.cursor()
+            c.execute(table, (doc_id, date, doc, store, amount, sum, surplus, shortage))
+            conn.commit()
 
     "--------------------------------------Явки-------------------------------------------------"
 
