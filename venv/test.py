@@ -37,7 +37,8 @@ str_date = todaydate.strftime("%Y-%m-%d")
 strn_date = nextdate.strftime("%Y-%m-%d")
 
 # get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
-get_surpshort = iiko_cleint.storage_check(str_date, strn_date)
+#get_inventory = iiko_cleint.inventory(str_date, strn_date)
+get_turnout =  iiko_cleint.turnout(str_date, strn_date)
 
 # while True:
 #     try:

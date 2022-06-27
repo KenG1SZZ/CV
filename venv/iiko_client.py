@@ -140,25 +140,23 @@ class IikoClient:
 
     "--------------------------------------Инвентеризация-------------------------------------------------"
 
-    def storage_check(self, pastdate, actualdate):
+    def inventory(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
         n_date = actualdate + 'T00:00:00.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <client-type>BACK</client-type>
     <enable-warnings>false</enable-warnings>
-    <obtained-license-connections-ids>df254ac2-335b-4b1a-9059-36001ee09206</obtained-license-connections-ids>
-    <request-watchdog-check-results>true</request-watchdog-check-results>
-    <use-raw-entities>true</use-raw-entities>
-    <dateFrom>2022-06-01T00:00:00.000+06:00</dateFrom>
-    <dateTo>2022-06-22T00:00:00.000+06:00</dateTo>
+    <dateFrom>%s</dateFrom>
+    <dateTo>%s</dateTo>
     <docType>INCOMING_INVENTORY</docType>
-</args>"""
-        # % (str_date, n_date)
-        response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
+</args>""" % (str_date, n_date)
+        response = requests.post(self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
                                  headers=self.headers, data=payload)
         parse = ET.fromstring(response.content)
         parse_str = parse.find('returnValue')
+        print("\n\nOKKKKK\n\n")
+        print(response.content)
         for i in parse_str.iter("i"):
             doc_id = i.find('documentID').text
             date = i.find('date').text
@@ -177,7 +175,7 @@ class IikoClient:
 
     "--------------------------------------Явки-------------------------------------------------"
 
-    def employee_check(self, pastdate, actualdate):
+    def turnout(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
         n_date = actualdate + 'T00:00:00.000+06:00'
 
