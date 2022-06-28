@@ -44,51 +44,47 @@ class IikoClient:
 
     "--------------------------------------Общая сумма кассы и себестоимость-------------------------------------------"
 
-    #     def cashshift_sum_report(self, pastdate, actualdate):
-    #         str_date = pastdate + 'T23:59:59.999+06:00'
-    #         n_date = actualdate + 'T23:59:59.999+06:00'
-    #         payload = """<?xml version="1.0" encoding="utf-8"?>
-    # <args>
-    #     <client-type>BACK</client-type>
-    #     <enable-warnings>false</enable-warnings>
-    #     <client-call-id>9aa8e655-214f-4dbe-b8bb-71dcb0d4d459</client-call-id>
-    #     <restrictions-state-hash>709</restrictions-state-hash>
-    #     <obtained-license-connections-ids>81988994-ac58-4b8f-8734-56d956332cf6</obtained-license-connections-ids>
-    #     <request-watchdog-check-results>true</request-watchdog-check-results>
-    #     <use-raw-entities>true</use-raw-entities>
-    #     <dateFrom>2022-05-01T00:00:00.000+06:00</dateFrom>
-    #     <dateTo>2022-06-14T23:59:59.000+06:00</dateTo>
-    #     <docType>SALES_DOCUMENT</docType>
-    # </args>""" % (str_date, n_date)
-    #
-    #         try:
-    #             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
-    #                                      headers=self.headers, data=payload)
-    #             parse = ET.fromstring(response.content)
-    #             for et in parse.iter("i"):
-    #                 if len(data := et.findall("v")) == 4:
-    #                     table = """INSERT INTO test(date,department,cash_sum,paytype) VALUES(%s,%s,%s,%s)"""
-    #                     date, department, cash_sum, paytype = (x.text for x in data)
-    #                     print(date, department, cash_sum, paytype)
-    #                     c = conn.cursor()
-    #                     c.execute(table, (date, department, cash_sum, paytype))
-    #                     conn.commit()
-    #             return response.content
-    #         except Exception as e:
-    #             return repr(e)
+    def cashshift_sum_report(self, pastdate, actualdate):
+        str_date = pastdate + 'T23:59:59.999+06:00'
+        n_date = actualdate + 'T23:59:59.999+06:00'
+        payload = """<?xml version="1.0" encoding="utf-8"?>
+    <args>
+    <client-type>BACK</client-type>
+    <dateFrom>%s</dateFrom>
+    <dateTo>%s</dateTo>
+    <docType>SALES_DOCUMENT</docType>
+</args>""" % (str_date, n_date)
 
+        response = requests.post(
+            self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
+            headers=self.headers, data=payload)
+        parse = ET.fromstring(response.content)
+        parse_str = parse.find('returnValue')
+        print(response.content)
+        for i in parse_str.iter("i"):
+            doc_code = i.find('documentID').text
+            date = i.find('date').text
+            doc = i.find('documentSummary').text
+            store_id = i.find('storeFrom').text
+            employee_id = i.find('userCreated').text
+            comment = i.find('comment').text
+            amount = i.find('amount').text
+            over_sales = i.find('sumWithoutNds').text
+            cost_price = i.find('totalCost').text
+            print(doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price)
+            table: str = """INSERT INTO over_sales(doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price) VALUES(%s,%s,
+                        %s,%s,%s,%s,%s,%s,%s) """
+            c = conn.cursor()
+            c.execute(table, (doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price))
+            conn.commit()
     "--------------------------------------Сумма кассы по аггрегаторам-------------------------------------------------"
 
     def casshift_by_aggregators(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
         n_date = actualdate + 'T00:00:00.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
-    <args>
+<args>
     <client-type>BACK</client-type>
-    <enable-warnings>false</enable-warnings>
-    <obtained-license-connections-ids>da370e44-0a82-438d-85f2-c9dd7b35fac8</obtained-license-connections-ids>
-    <request-watchdog-check-results>true</request-watchdog-check-results>
-    <use-raw-entities>true</use-raw-entities>
     <olapReportType>SALES</olapReportType>
     <groupByRowFields cls="java.util.ArrayList">
         <i>OpenDate.Typed</i>
@@ -103,8 +99,8 @@ class IikoClient:
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
             <periodType>CUSTOM</periodType>
-            <from cls="java.util.Date">%s</from>
-            <to cls="java.util.Date">%s</to>
+            <from cls="java.util.Date">2022-06-21T00:00:00.000+06:00</from>
+            <to cls="java.util.Date">2022-06-22T00:00:00.000+06:00</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
@@ -121,7 +117,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-    </args>""" % (str_date, n_date)
+</args>""" % (str_date, n_date)
         # '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
         #             <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
         response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
@@ -151,11 +147,11 @@ class IikoClient:
     <dateTo>%s</dateTo>
     <docType>INCOMING_INVENTORY</docType>
 </args>""" % (str_date, n_date)
-        response = requests.post(self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
-                                 headers=self.headers, data=payload)
+        response = requests.post(
+            self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
+            headers=self.headers, data=payload)
         parse = ET.fromstring(response.content)
         parse_str = parse.find('returnValue')
-        print("\n\nOKKKKK\n\n")
         print(response.content)
         for i in parse_str.iter("i"):
             doc_id = i.find('documentID').text
@@ -176,13 +172,21 @@ class IikoClient:
     "--------------------------------------Явки-------------------------------------------------"
 
     def turnout(self, pastdate, actualdate):
-        str_date = pastdate + 'T00:00:00.000+06:00'
-        n_date = actualdate + 'T00:00:00.000+06:00'
+        str_date = pastdate
+        n_date = actualdate
 
-        try:
-            response = requests.get(
-                self.host + '/resto/api/employees/attendance?from=%s&to=%s&withPaymentDetails=false&key=%s') % (
-                           str_date, n_date, self.token)
-            return response.content
-        except Exception as e:
-            return repr(e)
+        response = requests.get(
+            self.host + '/resto/api/employees/attendance?from=' + str_date + '&to=' + n_date + '&withPaymentDetails=false&key=' + self.token)
+        parse = ET.fromstring(response.content)
+        for i in parse.iter("attendance"):
+            doc_id = i.find('id').text
+            date = i.find('dateFrom').text
+            employee_id = i.find('employeeId').text
+            department_id = i.find('departmentId').text
+            department_name = i.find('departmentName').text
+            print(doc_id, employee_id, date, department_id, department_name)
+            table: str = """INSERT INTO turnout_table(doc_id, employee_id, date, department_id, 
+            department_name) VALUES(%s,%s,%s,%s,%s) """
+            c = conn.cursor()
+            c.execute(table, (doc_id, employee_id, date, department_id, department_name))
+            conn.commit()

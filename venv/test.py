@@ -38,7 +38,8 @@ strn_date = nextdate.strftime("%Y-%m-%d")
 
 # get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
 #get_inventory = iiko_cleint.inventory(str_date, strn_date)
-get_turnout =  iiko_cleint.turnout(str_date, strn_date)
+#get_turnout =  iiko_cleint.turnout(str_date, strn_date)
+get_overall = iiko_cleint.cashshift_sum_report(str_date, strn_date)
 
 # while True:
 #     try:
