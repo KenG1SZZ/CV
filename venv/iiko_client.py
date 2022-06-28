@@ -44,39 +44,39 @@ class IikoClient:
 
     "--------------------------------------Общая сумма кассы и себестоимость-------------------------------------------"
 
-    def cashshift_sum_report(self, pastdate, actualdate):
-        str_date = pastdate + 'T23:59:59.999+06:00'
-        n_date = actualdate + 'T23:59:59.999+06:00'
-        payload = """<?xml version="1.0" encoding="utf-8"?>
-    <args>
-    <client-type>BACK</client-type>
-    <dateFrom>%s</dateFrom>
-    <dateTo>%s</dateTo>
-    <docType>SALES_DOCUMENT</docType>
-</args>""" % (str_date, n_date)
-
-        response = requests.post(
-            self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
-            headers=self.headers, data=payload)
-        parse = ET.fromstring(response.content)
-        parse_str = parse.find('returnValue')
-        print(response.content)
-        for i in parse_str.iter("i"):
-            doc_code = i.find('documentID').text
-            date = i.find('date').text
-            doc = i.find('documentSummary').text
-            store_id = i.find('storeFrom').text
-            employee_id = i.find('userCreated').text
-            comment = i.find('comment').text
-            amount = i.find('amount').text
-            over_sales = i.find('sumWithoutNds').text
-            cost_price = i.find('totalCost').text
-            print(doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price)
-            table: str = """INSERT INTO over_sales(doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price) VALUES(%s,%s,
-                        %s,%s,%s,%s,%s,%s,%s) """
-            c = conn.cursor()
-            c.execute(table, (doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price))
-            conn.commit()
+#     def cashshift_sum_report(self, pastdate, actualdate):
+#         str_date = pastdate + 'T23:59:59.999+06:00'
+#         n_date = actualdate + 'T23:59:59.999+06:00'
+#         payload = """<?xml version="1.0" encoding="utf-8"?>
+#     <args>
+#     <client-type>BACK</client-type>
+#     <dateFrom>%s</dateFrom>
+#     <dateTo>%s</dateTo>
+#     <docType>SALES_DOCUMENT</docType>
+# </args>""" % (str_date, n_date)
+#
+#         response = requests.post(
+#             self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
+#             headers=self.headers, data=payload)
+#         parse = ET.fromstring(response.content)
+#         parse_str = parse.find('returnValue')
+#         print(response.content)
+#         for i in parse_str.iter("i"):
+#             doc_code = i.find('documentID').text
+#             date = i.find('date').text
+#             doc = i.find('documentSummary').text
+#             store_id = i.find('storeFrom').text
+#             employee_id = i.find('userCreated').text
+#             comment = i.find('comment').text
+#             amount = i.find('amount').text
+#             over_sales = i.find('sumWithoutNds').text
+#             cost_price = i.find('totalCost').text
+#             print(doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price)
+#             table: str = """INSERT INTO over_sales(doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price) VALUES(%s,%s,
+#                         %s,%s,%s,%s,%s,%s,%s) """
+#             c = conn.cursor()
+#             c.execute(table, (doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price))
+#             conn.commit()
     "--------------------------------------Сумма кассы по аггрегаторам-------------------------------------------------"
 
     def casshift_by_aggregators(self, pastdate, actualdate):
