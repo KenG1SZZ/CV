@@ -42,41 +42,116 @@ class IikoClient:
         }
         self.token = token
 
-    "--------------------------------------Общая сумма кассы и себестоимость-------------------------------------------"
+    "--------------------------------------Касса в день -----------------------------------------------"
 
-#     def cashshift_sum_report(self, pastdate, actualdate):
-#         str_date = pastdate + 'T23:59:59.999+06:00'
-#         n_date = actualdate + 'T23:59:59.999+06:00'
-#         payload = """<?xml version="1.0" encoding="utf-8"?>
-#     <args>
-#     <client-type>BACK</client-type>
-#     <dateFrom>%s</dateFrom>
-#     <dateTo>%s</dateTo>
-#     <docType>SALES_DOCUMENT</docType>
-# </args>""" % (str_date, n_date)
-#
-#         response = requests.post(
-#             self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
-#             headers=self.headers, data=payload)
-#         parse = ET.fromstring(response.content)
-#         parse_str = parse.find('returnValue')
-#         print(response.content)
-#         for i in parse_str.iter("i"):
-#             doc_code = i.find('documentID').text
-#             date = i.find('date').text
-#             doc = i.find('documentSummary').text
-#             store_id = i.find('storeFrom').text
-#             employee_id = i.find('userCreated').text
-#             comment = i.find('comment').text
-#             amount = i.find('amount').text
-#             over_sales = i.find('sumWithoutNds').text
-#             cost_price = i.find('totalCost').text
-#             print(doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price)
-#             table: str = """INSERT INTO over_sales(doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price) VALUES(%s,%s,
-#                         %s,%s,%s,%s,%s,%s,%s) """
-#             c = conn.cursor()
-#             c.execute(table, (doc_code, date, doc, employee_id, comment, store_id, amount, over_sales, cost_price))
-#             conn.commit()
+    def sales_by_day(self, pastdate, actualdate):
+        str_date = pastdate + 'T00:00:00.000+06:00'
+        n_date = actualdate + 'T23:59:59.000+06:00'
+        payload = """<?xml version="1.0" encoding="utf-8"?>
+<args>
+    <client-type>BACK</client-type>
+    <olapReportType>SALES</olapReportType>
+    <groupByRowFields cls="java.util.ArrayList">
+        <i>OpenDate.Typed</i>
+    </groupByRowFields>
+    <groupByColFields cls="java.util.ArrayList">
+        <i>Department</i>
+    </groupByColFields>
+    <aggregateFields cls="java.util.ArrayList">
+        <i>DishSumInt</i>
+    </aggregateFields>
+    <filters>
+        <k>SessionID.OperDay</k>
+        <v cls="FilterDateRangeCriteria">
+            <periodType>CUSTOM</periodType>
+            <from cls="java.util.Date">2022-06-01T00:00:00.000+06:00</from>
+            <to cls="java.util.Date">2022-06-28T00:00:00.000+06:00</to>
+            <includeLow>true</includeLow>
+            <includeHigh>false</includeHigh>
+        </v>
+        <k>DeletedWithWriteoff</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="DishDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+        <k>OrderDeleted</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="OrderDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+    </filters>
+</args>"""
+                  # % (str_date, n_date)
+
+        response = requests.post(
+            self.host + '/resto/services/olapReport?methodName=buildReport',
+            headers=self.headers, data=payload)
+        parse_aggr = ET.fromstring(response.content)
+
+        for et in parse_aggr.iter("i"):
+            if len(data := et.findall("v")) == 3:
+                table = """INSERT INTO sales_by_day(date,department,sales) VALUES(%s,%s,%s)"""
+                date, department, sales = (x.text for x in data)
+                print(date, department, sales)
+                c = conn.cursor()
+                c.execute(table, (date, department, sales))
+                conn.commit()
+
+    "-----------------------------------Себестоимость -------------------------------------------------------------------"
+    def cashshift_report(self, pastdate, actualdate):
+        str_date = pastdate + 'T00:00:00.000+06:00'
+        n_date = actualdate + 'T23:59:59.000+06:00'
+        payload = """<?xml version="1.0" encoding="utf-8"?>
+<args>
+    <client-type>BACK</client-type>
+    <olapReportType>SALES</olapReportType>
+    <groupByRowFields cls="java.util.ArrayList">
+        <i>Department</i>
+    </groupByRowFields>
+    <groupByColFields cls="java.util.ArrayList">
+        <i>OpenDate.Typed</i>
+    </groupByColFields>
+    <aggregateFields cls="java.util.ArrayList">
+        <i>ProductCostBase.ProductCost</i>
+    </aggregateFields>
+    <filters>
+        <k>SessionID.OperDay</k>
+        <v cls="FilterDateRangeCriteria">
+            <periodType>CUSTOM</periodType>
+            <from cls="java.util.Date">2022-06-01T00:00:00.000+06:00</from>
+            <to cls="java.util.Date">2022-06-28T00:00:00.000+06:00</to>
+            <includeLow>true</includeLow>
+            <includeHigh>false</includeHigh>
+        </v>
+        <k>DeletedWithWriteoff</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="DishDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+        <k>OrderDeleted</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="OrderDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+    </filters>
+</args>"""
+        response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
+                                 headers=self.headers, data=payload)
+
+        parse_aggr = ET.fromstring(response.content)
+
+        for et in parse_aggr.iter("i"):
+            if len(data := et.findall("v")) == 3:
+                table = """INSERT INTO cost_price(date,department,cost_price) VALUES(%s,%s,%s)"""
+                date, department, cost_price = (x.text for x in data)
+                print(date, department, cost_price)
+                c = conn.cursor()
+                c.execute(table, (date, department, cost_price))
+                conn.commit()
     "--------------------------------------Сумма кассы по аггрегаторам-------------------------------------------------"
 
     def casshift_by_aggregators(self, pastdate, actualdate):
@@ -99,8 +174,8 @@ class IikoClient:
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
             <periodType>CUSTOM</periodType>
-            <from cls="java.util.Date">2022-06-21T00:00:00.000+06:00</from>
-            <to cls="java.util.Date">2022-06-22T00:00:00.000+06:00</to>
+            <from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
+            <to cls="java.util.Date">2022-06-28T00:00:00.000+06:00</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
@@ -117,7 +192,8 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" % (str_date, n_date)
+</args>""" \
+                  # % (str_date, n_date)
         # '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
         #             <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
         response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
