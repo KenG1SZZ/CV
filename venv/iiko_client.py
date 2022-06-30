@@ -64,8 +64,8 @@ class IikoClient:
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
             <periodType>CUSTOM</periodType>
-            <from cls="java.util.Date">2022-06-01T00:00:00.000+06:00</from>
-            <to cls="java.util.Date">2022-06-28T00:00:00.000+06:00</to>
+            <from cls="java.util.Date">%s</from>
+            <to cls="java.util.Date">%s</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
@@ -82,8 +82,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>"""
-                  # % (str_date, n_date)
+</args>""" % (str_date, n_date)
 
         response = requests.post(
             self.host + '/resto/services/olapReport?methodName=buildReport',
@@ -120,8 +119,8 @@ class IikoClient:
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
             <periodType>CUSTOM</periodType>
-            <from cls="java.util.Date">2022-06-01T00:00:00.000+06:00</from>
-            <to cls="java.util.Date">2022-06-28T00:00:00.000+06:00</to>
+            <from cls="java.util.Date">%s</from>
+            <to cls="java.util.Date">%s</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
@@ -138,7 +137,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>"""
+</args>""" % (str_date, n_date)
         response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
                                  headers=self.headers, data=payload)
 
@@ -174,8 +173,8 @@ class IikoClient:
         <k>SessionID.OperDay</k>
         <v cls="FilterDateRangeCriteria">
             <periodType>CUSTOM</periodType>
-            <from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
-            <to cls="java.util.Date">2022-06-28T00:00:00.000+06:00</to>
+            <from cls="java.util.Date">%s</from>
+            <to cls="java.util.Date">%s</to>
             <includeLow>true</includeLow>
             <includeHigh>false</includeHigh>
         </v>
@@ -192,8 +191,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" \
-                  # % (str_date, n_date)
+</args>"""  % (str_date, n_date)
         # '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
         #             <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
         response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
@@ -228,7 +226,6 @@ class IikoClient:
             headers=self.headers, data=payload)
         parse = ET.fromstring(response.content)
         parse_str = parse.find('returnValue')
-        print(response.content)
         for i in parse_str.iter("i"):
             doc_id = i.find('documentID').text
             date = i.find('date').text
@@ -239,7 +236,7 @@ class IikoClient:
             surplus = i.find('surplusSum').text
             shortage = i.find('shortageSum').text
             print(doc_id, date, doc, store, amount, sum, surplus, shortage)
-            table: str = """INSERT INTO test(doc_id, date, doc, store_id, amount, sum, surplus, shortage) VALUES(%s,%s,
+            table: str = """INSERT INTO inventory(doc_id, date, doc, store_id, amount, sum, surplus, shortage) VALUES(%s,%s,
             %s,%s,%s,%s,%s,%s) """
             c = conn.cursor()
             c.execute(table, (doc_id, date, doc, store, amount, sum, surplus, shortage))

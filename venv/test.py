@@ -7,7 +7,7 @@ from iiko_auth import IikoServer
 import datetime
 from datetime import date, timedelta
 import time
-
+from time import sleep
 
 """ TODO
 []Показатели для Daily Sales Report
@@ -33,30 +33,32 @@ IIKO_TOKEN = iiko_log.auth()
 iiko_cleint = IikoClient(IIKO_URL, IIKO_LOGIN, IIKO_PASSWORD, IIKO_VERSION, IIKO_TOKEN)
 todaydate = date.today() - timedelta(days=1)
 nextdate = date.today()
+futuredate = date.today() + timedelta(days=1)
 str_date = todaydate.strftime("%Y-%m-%d")
 strn_date = nextdate.strftime("%Y-%m-%d")
+strf_date = futuredate.strftime("%Y-%m-%d")
+while True:
+    try:
+        get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
 
-# get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
-#get_inventory = iiko_cleint.inventory(str_date, strn_date)
-#get_turnout =  iiko_cleint.turnout(str_date, strn_date)
-#get_overall = iiko_cleint.sales_by_day(str_date, strn_date)
-# get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
+        get_inventory = iiko_cleint.inventory(str_date, strn_date)
 
-# while True:
-#     try:
-#         def get_oversales():
-#
-#
-#         def get_aggrsales():
-#
-#
-#         # def get_pricecost ():
-#
-#         # def get_storeitems():
-#
-#         # def get_emplshift ():
-#         time.sleep(30)
-#     except Exception as e:
-#         print('exception error', e, end='\n\n#############################\n')
+        get_turnout = iiko_cleint.turnout(strn_date, strf_date)
+
+        get_overall = iiko_cleint.sales_by_day(str_date, strn_date)
+
+        get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
+
+        time.sleep(120)
+    except Exception as e:
+        print('exception error', e, end='\n\n#############################\n')
+        get_em = ''
+
+
+
+
+
+
+
 
 
