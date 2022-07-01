@@ -260,7 +260,7 @@ class IikoClient:
                 conn.commit()
         except Exception as e:
             print('Exception Error ', e, end='\n\n#############################\n')
-            error_handle = ''
+            error_handle = 'Insert into duplicate key'
     "--------------------------------------Явки-------------------------------------------------"
 
     def turnout(self, pastdate, actualdate):
