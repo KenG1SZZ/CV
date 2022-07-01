@@ -83,20 +83,24 @@ class IikoClient:
         </v>
     </filters>
 </args>""" % (str_date, n_date)
+        try:
+            response = requests.post(
+                self.host + '/resto/services/olapReport?methodName=buildReport',
+                headers=self.headers, data=payload)
+            parse_aggr = ET.fromstring(response.content)
 
-        response = requests.post(
-            self.host + '/resto/services/olapReport?methodName=buildReport',
-            headers=self.headers, data=payload)
-        parse_aggr = ET.fromstring(response.content)
+            for et in parse_aggr.iter("i"):
+                if len(data := et.findall("v")) == 3:
+                    table = """INSERT INTO sales_by_day(date,department,sales) VALUES(%s,%s,%s)"""
+                    date, department, sales = (x.text for x in data)
+                    print(date, department, sales)
+                    c = conn.cursor()
+                    c.execute(table, (date, department, sales))
+                    conn.commit()
 
-        for et in parse_aggr.iter("i"):
-            if len(data := et.findall("v")) == 3:
-                table = """INSERT INTO sales_by_day(date,department,sales) VALUES(%s,%s,%s)"""
-                date, department, sales = (x.text for x in data)
-                print(date, department, sales)
-                c = conn.cursor()
-                c.execute(table, (date, department, sales))
-                conn.commit()
+        except Exception as e:
+            print('exception error   ', e, end='\n\n#############################\n')
+            error_handle = ''
 
     "-----------------------------------Себестоимость -------------------------------------------------------------------"
     def cashshift_report(self, pastdate, actualdate):
@@ -138,19 +142,25 @@ class IikoClient:
         </v>
     </filters>
 </args>""" % (str_date, n_date)
-        response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
-                                 headers=self.headers, data=payload)
+        try:
+            response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
+                                     headers=self.headers, data=payload)
 
-        parse_aggr = ET.fromstring(response.content)
+            parse_aggr = ET.fromstring(response.content)
 
-        for et in parse_aggr.iter("i"):
-            if len(data := et.findall("v")) == 3:
-                table = """INSERT INTO cost_price(date,department,cost_price) VALUES(%s,%s,%s)"""
-                date, department, cost_price = (x.text for x in data)
-                print(date, department, cost_price)
-                c = conn.cursor()
-                c.execute(table, (date, department, cost_price))
-                conn.commit()
+            for et in parse_aggr.iter("i"):
+                if len(data := et.findall("v")) == 3:
+                    table = """INSERT INTO cost_price(date,department,cost_price) VALUES(%s,%s,%s)"""
+                    date, department, cost_price = (x.text for x in data)
+                    print(date, department, cost_price)
+                    c = conn.cursor()
+                    c.execute(table, (date, department, cost_price))
+                    conn.commit()
+
+        except Exception as e:
+            print('exception error   ', e, end='\n\n#############################\n')
+            error_handle = ''
+
     "--------------------------------------Сумма кассы по аггрегаторам-------------------------------------------------"
 
     def casshift_by_aggregators(self, pastdate, actualdate):
@@ -210,7 +220,7 @@ class IikoClient:
                     conn.commit()
 
         except Exception as e:
-            print('exception error', e, end='\n\n#############################\n')
+            print('exception error   ', e, end='\n\n#############################\n')
             error_handle = ''
 
 
@@ -227,45 +237,53 @@ class IikoClient:
     <dateTo>%s</dateTo>
     <docType>INCOMING_INVENTORY</docType>
 </args>""" % (str_date, n_date)
-        response = requests.post(
-            self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
-            headers=self.headers, data=payload)
-        parse = ET.fromstring(response.content)
-        parse_str = parse.find('returnValue')
-        for i in parse_str.iter("i"):
-            doc_id = i.find('documentID').text
-            date = i.find('date').text
-            doc = i.find('documentSummary').text
-            store = i.find('storeFrom').text
-            amount = i.find('amount').text
-            sum = i.find('sum').text
-            surplus = i.find('surplusSum').text
-            shortage = i.find('shortageSum').text
-            print(doc_id, date, doc, store, amount, sum, surplus, shortage)
-            table: str = """INSERT INTO inventory(doc_id, date, doc, store_id, amount, sum, surplus, shortage) VALUES(%s,%s,
-            %s,%s,%s,%s,%s,%s) """
-            c = conn.cursor()
-            c.execute(table, (doc_id, date, doc, store, amount, sum, surplus, shortage))
-            conn.commit()
-
+        try:
+            response = requests.post(
+                self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
+                headers=self.headers, data=payload)
+            parse = ET.fromstring(response.content)
+            parse_str = parse.find('returnValue')
+            for i in parse_str.iter("i"):
+                doc_id = i.find('documentID').text
+                date = i.find('date').text
+                doc = i.find('documentSummary').text
+                store = i.find('storeFrom').text
+                amount = i.find('amount').text
+                sum = i.find('sum').text
+                surplus = i.find('surplusSum').text
+                shortage = i.find('shortageSum').text
+                print(doc_id, date, doc, store, amount, sum, surplus, shortage)
+                table: str = """INSERT INTO inventory(doc_id, date, doc, store_id, amount, sum, surplus, shortage) VALUES(%s,%s,
+                        %s,%s,%s,%s,%s,%s) """
+                c = conn.cursor()
+                c.execute(table, (doc_id, date, doc, store, amount, sum, surplus, shortage))
+                conn.commit()
+        except Exception as e:
+            print('Exception Error ', e, end='\n\n#############################\n')
+            error_handle = ''
     "--------------------------------------Явки-------------------------------------------------"
 
     def turnout(self, pastdate, actualdate):
         str_date = pastdate
         n_date = actualdate
 
-        response = requests.get(
-            self.host + '/resto/api/employees/attendance?from=' + str_date + '&to=' + n_date + '&withPaymentDetails=false&key=' + self.token)
-        parse = ET.fromstring(response.content)
-        for i in parse.iter("attendance"):
-            doc_id = i.find('id').text
-            date = i.find('dateFrom').text
-            employee_id = i.find('employeeId').text
-            department_id = i.find('departmentId').text
-            department_name = i.find('departmentName').text
-            print(doc_id, employee_id, date, department_id, department_name)
-            table: str = """INSERT INTO turnout_table(doc_id, employee_id, date, department_id, 
-            department_name) VALUES(%s,%s,%s,%s,%s) """
-            c = conn.cursor()
-            c.execute(table, (doc_id, employee_id, date, department_id, department_name))
-            conn.commit()
+        try:
+            response = requests.get(
+                self.host + '/resto/api/employees/attendance?from=' + str_date + '&to=' + n_date + '&withPaymentDetails=false&key=' + self.token)
+            parse = ET.fromstring(response.content)
+            for i in parse.iter("attendance"):
+                doc_id = i.find('id').text
+                date = i.find('dateFrom').text
+                employee_id = i.find('employeeId').text
+                department_id = i.find('departmentId').text
+                department_name = i.find('departmentName').text
+                print(doc_id, employee_id, date, department_id, department_name)
+                table: str = """INSERT INTO turnout_table(doc_id, employee_id, date, department_id, 
+                        department_name) VALUES(%s,%s,%s,%s,%s) """
+                c = conn.cursor()
+                c.execute(table, (doc_id, employee_id, date, department_id, department_name))
+                conn.commit()
+
+        except Exception as e:
+            print('Exception Error ', e, end='\n\n#############################\n')
+            error_handle = ''
