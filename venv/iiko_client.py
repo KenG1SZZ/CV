@@ -62,7 +62,7 @@ class IikoClient:
     </aggregateFields>
     <filters>
         <k>SessionID.OperDay</k>
-        <v cls="FilterDateRangeCriteria">
+        <v cls="FilterDateRangeCriteria"> 
             <periodType>CUSTOM</periodType>
             <from cls="java.util.Date">%s</from>
             <to cls="java.util.Date">%s</to>
@@ -194,19 +194,25 @@ class IikoClient:
 </args>"""  % (str_date, n_date)
         # '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
         #             <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
-        response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
-                                 headers=self.headers, data=payload)
+        try:
+            response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
+                                     headers=self.headers, data=payload)
 
-        parse_aggr = ET.fromstring(response.content)
+            parse_aggr = ET.fromstring(response.content)
 
-        for et in parse_aggr.iter("i"):
-            if len(data := et.findall("v")) == 4:
-                table = """INSERT INTO aggr_sales(date,department,cash_sum,paytype) VALUES(%s,%s,%s,%s)"""
-                date, department, cash_sum, paytype = (x.text for x in data)
-                print(date, department, cash_sum, paytype)
-                c = conn.cursor()
-                c.execute(table, (date, department, cash_sum, paytype))
-                conn.commit()
+            for et in parse_aggr.iter("i"):
+                if len(data := et.findall("v")) == 4:
+                    table = """INSERT INTO aggr_sales(date,department,cash_sum,paytype) VALUES(%s,%s,%s,%s)"""
+                    date, department, cash_sum, paytype = (x.text for x in data)
+                    print(date, department, cash_sum, paytype)
+                    c = conn.cursor()
+                    c.execute(table, (date, department, cash_sum, paytype))
+                    conn.commit()
+
+        except Exception as e:
+            print('exception error', e, end='\n\n#############################\n')
+            error_handle = ''
+
 
     "--------------------------------------Инвентеризация-------------------------------------------------"
 

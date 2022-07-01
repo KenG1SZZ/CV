@@ -38,7 +38,7 @@ str_date = todaydate.strftime("%Y-%m-%d")
 strn_date = nextdate.strftime("%Y-%m-%d")
 strf_date = futuredate.strftime("%Y-%m-%d")
 while True:
-    try:
+
         get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
 
         get_inventory = iiko_cleint.inventory(str_date, strn_date)
@@ -50,9 +50,7 @@ while True:
         get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
 
         time.sleep(120)
-    except Exception as e:
-        print('exception error', e, end='\n\n#############################\n')
-        get_em = ''
+
 
 
 
