@@ -47,6 +47,8 @@ class IikoClient:
     def sales_by_day(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
         n_date = actualdate + 'T23:59:59.000+06:00'
+        date1 = '2022-06-28T00:00:00.000+06:00'
+        date2 = '2022-07-03T00:00:00.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <client-type>BACK</client-type>
@@ -82,7 +84,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" % (str_date, n_date)
+</args>""" % (date1, date2)
         try:
             response = requests.post(
                 self.host + '/resto/services/olapReport?methodName=buildReport',
@@ -100,12 +102,17 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = ''
+            error_handle = """Insert into sales_by_day(date,department,sales) values('','','') on duplicate key update date = date"""
+            c = conn.cursor()
+            c.execute(error_handle)
+            conn.commit()
 
     "-----------------------------------Себестоимость -------------------------------------------------------------------"
     def cashshift_report(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
         n_date = actualdate + 'T23:59:59.000+06:00'
+        date1 = '2022-06-28T00:00:00.000+06:00'
+        date2 = '2022-07-03T00:00:00.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <client-type>BACK</client-type>
@@ -141,7 +148,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>""" % (str_date, n_date)
+</args>""" % (date1, date2)
         try:
             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
                                      headers=self.headers, data=payload)
@@ -159,13 +166,18 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = ''
+            error_handle = """Insert into cost_price(department) values('') on duplicate key update department = department"""
+            c = conn.cursor()
+            c.execute(error_handle)
+            conn.commit()
 
     "--------------------------------------Сумма кассы по аггрегаторам-------------------------------------------------"
 
     def casshift_by_aggregators(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
         n_date = actualdate + 'T00:00:00.000+06:00'
+        date1 = '2022-06-28T00:00:00.000+06:00'
+        date2 = '2022-07-03T00:00:00.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <client-type>BACK</client-type>
@@ -201,7 +213,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>"""  % (str_date, n_date)
+</args>"""  % (date1, date2)
         # '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
         #             <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
         try:
@@ -221,14 +233,17 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = ''
-
-
+            error_handle = """Insert into aggr_sales(department) values('') on duplicate key update department = department"""
+            c = conn.cursor()
+            c.execute(error_handle)
+            conn.commit()
     "--------------------------------------Инвентеризация-------------------------------------------------"
 
     def inventory(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
         n_date = actualdate + 'T00:00:00.000+06:00'
+        date1 = '2022-06-28T00:00:00.000+06:00'
+        date2 = '2022-07-03T00:00:00.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <client-type>BACK</client-type>
@@ -236,7 +251,7 @@ class IikoClient:
     <dateFrom>%s</dateFrom>
     <dateTo>%s</dateTo>
     <docType>INCOMING_INVENTORY</docType>
-</args>""" % (str_date, n_date)
+</args>""" % (date1, date2)
         try:
             response = requests.post(
                 self.host + '/resto/services/document?methodName=getIncomingDocumentsRecordsByDepartments',
@@ -259,21 +274,27 @@ class IikoClient:
                 c.execute(table, (doc_id, date, doc, store, amount, sum, surplus, shortage))
                 conn.commit()
         except Exception as e:
-            print('Exception Error ', e, end='\n\n#############################\n')
-            error_handle = 'Insert into duplicate key'
+            print('exception error   ', e, end='\n\n#############################\n')
+            error_handle = """Insert into inventory(store_id) values('') on duplicate key update doc_id = doc_id"""
+            c = conn.cursor()
+            c.execute(error_handle)
+            conn.commit()
     "--------------------------------------Явки-------------------------------------------------"
 
     def turnout(self, pastdate, actualdate):
         str_date = pastdate
         n_date = actualdate
-
+        date1 = '2022-06-28T00:00:00.000+06:00'
+        date2 = '2022-07-03T00:00:00.000+06:00'
         try:
             response = requests.get(
-                self.host + '/resto/api/employees/attendance?from=' + str_date + '&to=' + n_date + '&withPaymentDetails=false&key=' + self.token)
+                self.host + '/resto/api/employees/attendance?from=' + date1 + '&to=' + date2 + '&withPaymentDetails=false&key=' + self.token)
             parse = ET.fromstring(response.content)
             for i in parse.iter("attendance"):
                 doc_id = i.find('id').text
                 date = i.find('dateFrom').text
+                # if (date < pastdate or date > actualdate):
+                #     continue
                 employee_id = i.find('employeeId').text
                 department_id = i.find('departmentId').text
                 department_name = i.find('departmentName').text
@@ -285,5 +306,8 @@ class IikoClient:
                 conn.commit()
 
         except Exception as e:
-            print('Exception Error ', e, end='\n\n#############################\n')
-            error_handle = ''
+            print('exception error   ', e, end='\n\n#############################\n')
+            error_handle = """Insert into turnout_table(department_name) values('') on duplicate key update doc_id = doc_id"""
+            c = conn.cursor()
+            c.execute(error_handle)
+            conn.commit()
