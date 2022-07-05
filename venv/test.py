@@ -45,7 +45,7 @@ while True:
         #
         get_turnout = iiko_cleint.turnout(strn_date, strf_date)
         #
-        # get_overall = iiko_cleint.sales_by_day(str_date, strn_date)
+        get_overall = iiko_cleint.sales_by_day(str_date, strn_date)
         #
         get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
 
