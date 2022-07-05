@@ -8,7 +8,7 @@ import datetime
 from datetime import date, timedelta
 import time
 from time import sleep
-
+import pyinstaller
 """ TODO
 []Показатели для Daily Sales Report
 [*]Количество заказов в день
