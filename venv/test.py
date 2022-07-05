@@ -49,7 +49,7 @@ while True:
         #
         get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
 
-        time.sleep(5)
+        time.sleep(15)
 
 
 
