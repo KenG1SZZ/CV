@@ -8,17 +8,6 @@ import datetime
 from datetime import date, timedelta
 import time
 from time import sleep
-import pyinstaller
-""" TODO
-[]Показатели для Daily Sales Report
-[*]Количество заказов в день
-[*]Касса в день
-[*]Средний заказ
-[]Закуп в день в тенге  (приход продукции, накладные) (цеха, точки, города)
-[]Себестоимость в тенге
-[]Расход в день в тенге (акты реализации, списание, перемещение)
-[*]Заказ на сегодня в тенге
-"""
 
 
 IIKO_URL = 'https://bahandi-co.iiko.it'
@@ -39,15 +28,15 @@ strn_date = nextdate.strftime("%Y-%m-%d")
 strf_date = futuredate.strftime("%Y-%m-%d")
 while True:
 
-        get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
+        # get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
 
-        get_inventory = iiko_cleint.inventory(str_date, strn_date)
+        # get_inventory = iiko_cleint.inventory(str_date, strn_date)
         #
-        get_turnout = iiko_cleint.turnout(strn_date, strf_date)
+        # get_turnout = iiko_cleint.turnout(strn_date, strf_date)
         #
         get_overall = iiko_cleint.sales_by_day(str_date, strn_date)
         #
-        get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
+        # get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
 
         time.sleep(35)
 
