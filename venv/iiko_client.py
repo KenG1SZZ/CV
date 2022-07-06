@@ -45,53 +45,51 @@ class IikoClient:
     "--------------------------------------Касса в день -----------------------------------------------"
 
     def sales_by_day(self, pastdate, actualdate):
-        # str_date = pastdate + 'T00:00:00.000+06:00'
-        # n_date = actualdate + 'T23:59:59.000+06:00'
-        str_date ='2022-06-27T00:00:00.000+06:00'
-        n_date = '2022-07-04T23:59:59.000+06:00'
+        str_date = pastdate + 'T00:00:00.000+06:00'
+        n_date = actualdate + 'T23:59:59.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
-<args>
-    <client-type>BACK</client-type>
-    <olapReportType>SALES</olapReportType>
-    <groupByRowFields cls="java.util.ArrayList">
-        <i>OpenDate.Typed</i>
-    </groupByRowFields>
-    <groupByColFields cls="java.util.ArrayList">
-        <i>Department</i>
-    </groupByColFields>
-    <aggregateFields cls="java.util.ArrayList">
-        <i>DishSumInt</i>
-    </aggregateFields>
-    <filters>
-        <k>SessionID.OperDay</k>
-        <v cls="FilterDateRangeCriteria">
-            <periodType>CUSTOM</periodType>
-            <from cls="java.util.Date">%s</from>
-            <to cls="java.util.Date">%s</to>
-            <includeLow>true</includeLow>
-            <includeHigh>false</includeHigh>
-        </v>
-        <k>DeletedWithWriteoff</k>
-        <v cls="FilterIncludeValuesCriteria">
-            <values>
-                <i cls="DishDeletionStatus">NOT_DELETED</i>
-            </values>
-        </v>
-        <k>OrderDeleted</k>
-        <v cls="FilterIncludeValuesCriteria">
-            <values>
-                <i cls="OrderDeletionStatus">NOT_DELETED</i>
-            </values>
-        </v>
-    </filters>
-</args>""" % (str_date, n_date)
+        <args>
+            <client-type>BACK</client-type>
+            <olapReportType>SALES</olapReportType>
+            <groupByRowFields cls="java.util.ArrayList">
+                <i>OpenDate.Typed</i>
+            </groupByRowFields>
+            <groupByColFields cls="java.util.ArrayList">
+                <i>Department</i>
+            </groupByColFields>
+            <aggregateFields cls="java.util.ArrayList">
+                <i>DishSumInt</i>
+            </aggregateFields>
+            <filters>
+                <k>SessionID.OperDay</k>
+                <v cls="FilterDateRangeCriteria">
+                    <periodType>CUSTOM</periodType>
+                    <from cls="java.util.Date">2022-06-01T00:00:00.000+06:00</from>
+                    <to cls="java.util.Date">2022-06-30T00:00:00.000+06:00</to>
+                    <includeLow>true</includeLow>
+                    <includeHigh>false</includeHigh>
+                </v>
+                <k>DeletedWithWriteoff</k>
+                <v cls="FilterIncludeValuesCriteria">
+                    <values>
+                        <i cls="DishDeletionStatus">NOT_DELETED</i>
+                    </values>
+                </v>
+                <k>OrderDeleted</k>
+                <v cls="FilterIncludeValuesCriteria">
+                    <values>
+                        <i cls="OrderDeletionStatus">NOT_DELETED</i>
+                    </values>
+                </v>
+            </filters>
+        </args>"""
+        # % (str_date, n_date)
+
+        response = requests.post(
+            self.host + '/resto/services/olapReport?methodName=buildReport',
+            headers=self.headers, data=payload)
+        parse_aggr = ET.fromstring(response.content)
         try:
-            response = requests.post(
-                self.host + '/resto/services/olapReport?methodName=buildReport',
-                headers=self.headers, data=payload)
-            parse_aggr = ET.fromstring(response.content)
-            print('asdADSADADAd')
-            print(response.content)
             for et in parse_aggr.iter("i"):
                 if len(data := et.findall("v")) == 3:
                     table = """INSERT INTO sales_by_day(date,department,sales) VALUES(%s,%s,%s)"""
@@ -103,12 +101,13 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = """Insert into sales_by_day(department) values('') on duplicate key update sales = sales"""
+            error_handle = """Insert into sales_by_day(date,department,sales) values(1900-00-00,'','') on duplicate key update date = date"""
             c = conn.cursor()
             c.execute(error_handle)
             conn.commit()
 
     "-----------------------------------Себестоимость -------------------------------------------------------------------"
+
     def cashshift_report(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
         n_date = actualdate + 'T23:59:59.000+06:00'
@@ -165,7 +164,7 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = """Insert into cost_price(department) values('') on duplicate key update cost_price = cost_price"""
+            error_handle = """Insert into cost_price(date,department,cost_price) values(1900-00-00,'','') on duplicate key update date = date"""
             c = conn.cursor()
             c.execute(error_handle)
             conn.commit()
@@ -173,8 +172,10 @@ class IikoClient:
     "--------------------------------------Сумма кассы по аггрегаторам-------------------------------------------------"
 
     def casshift_by_aggregators(self, pastdate, actualdate):
-        str_date = pastdate + 'T00:00:00.000+06:00'
-        n_date = actualdate + 'T00:00:00.000+06:00'
+        # str_date = pastdate + 'T00:00:00.000+06:00'
+        # n_date = actualdate + 'T00:00:00.000+06:00'
+        str_date = '2022-05-01T00:00:00.000+06:00'
+        n_date = '2022-07-01T00:00:00.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
 <args>
     <client-type>BACK</client-type>
@@ -210,7 +211,7 @@ class IikoClient:
             </values>
         </v>
     </filters>
-</args>"""  % (str_date, n_date)
+</args>""" % (str_date, n_date)
         # '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
         #             <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
         try:
@@ -230,10 +231,11 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = """Insert into aggr_sales(department) values('') on duplicate key update paytype = paytype"""
+            error_handle = """Insert into aggr_sales(date,department,cash_sum,paytype) values(1900-00-00,'','','') on duplicate key update date = date"""
             c = conn.cursor()
             c.execute(error_handle)
             conn.commit()
+
     "--------------------------------------Инвентеризация-------------------------------------------------"
 
     def inventory(self, pastdate, actualdate):
@@ -274,6 +276,7 @@ class IikoClient:
             c = conn.cursor()
             c.execute(error_handle)
             conn.commit()
+
     "--------------------------------------Явки-------------------------------------------------"
 
     def turnout(self, pastdate, actualdate):
