@@ -46,43 +46,43 @@ class IikoClient:
 
     def sales_by_day(self, pastdate, actualdate):
         str_date = pastdate + 'T00:00:00.000+06:00'
-        n_date = actualdate + 'T23:59:59.000+06:00'
+        n_date = actualdate + 'T00:00:00.000+06:00'
         payload = """<?xml version="1.0" encoding="utf-8"?>
-        <args>
-            <client-type>BACK</client-type>
-            <olapReportType>SALES</olapReportType>
-            <groupByRowFields cls="java.util.ArrayList">
-                <i>OpenDate.Typed</i>
-            </groupByRowFields>
-            <groupByColFields cls="java.util.ArrayList">
-                <i>Department</i>
-            </groupByColFields>
-            <aggregateFields cls="java.util.ArrayList">
-                <i>DishSumInt</i>
-            </aggregateFields>
-            <filters>
-                <k>SessionID.OperDay</k>
-                <v cls="FilterDateRangeCriteria">
-                    <periodType>CUSTOM</periodType>
-                    <from cls="java.util.Date">%s</from>
-                    <to cls="java.util.Date">%s</to>
-                    <includeLow>true</includeLow>
-                    <includeHigh>false</includeHigh>
-                </v>
-                <k>DeletedWithWriteoff</k>
-                <v cls="FilterIncludeValuesCriteria">
-                    <values>
-                        <i cls="DishDeletionStatus">NOT_DELETED</i>
-                    </values>
-                </v>
-                <k>OrderDeleted</k>
-                <v cls="FilterIncludeValuesCriteria">
-                    <values>
-                        <i cls="OrderDeletionStatus">NOT_DELETED</i>
-                    </values>
-                </v>
-            </filters>
-        </args>""" \
+<args>
+    <client-type>BACK</client-type>
+    <olapReportType>SALES</olapReportType>
+    <groupByRowFields cls="java.util.ArrayList">
+        <i>OpenDate.Typed</i>
+    </groupByRowFields>
+    <groupByColFields cls="java.util.ArrayList">
+        <i>Department</i>
+    </groupByColFields>
+    <aggregateFields cls="java.util.ArrayList">
+        <i>DishSumInt</i>
+    </aggregateFields>
+    <filters>
+        <k>SessionID.OperDay</k>
+        <v cls="FilterDateRangeCriteria">
+            <periodType>CUSTOM</periodType>
+            <from cls="java.util.Date">%s</from>
+            <to cls="java.util.Date">%s</to>
+            <includeLow>true</includeLow>
+            <includeHigh>false</includeHigh>
+        </v>
+        <k>DeletedWithWriteoff</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="DishDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+        <k>OrderDeleted</k>
+        <v cls="FilterIncludeValuesCriteria">
+            <values>
+                <i cls="OrderDeletionStatus">NOT_DELETED</i>
+            </values>
+        </v>
+    </filters>
+</args>""" \
                    % (str_date, n_date)
 
         response = requests.post(
@@ -228,7 +228,7 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = """Insert into aggr_sales(department) values('') on duplicate key update department = department"""
+            error_handle = """Insert into aggr_sales(department) values('') on duplicate key update i = i"""
             c = conn.cursor()
             c.execute(error_handle)
             conn.commit()
