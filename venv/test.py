@@ -24,15 +24,58 @@ futuredate = date.today() + timedelta(days=1)
 str_date = todaydate.strftime("%Y-%m-%d")
 strn_date = nextdate.strftime("%Y-%m-%d")
 strf_date = futuredate.strftime("%Y-%m-%d")
-while True:
-    get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
 
-    get_inventory = iiko_cleint.inventory(str_date, strn_date)
 
-    get_turnout = iiko_cleint.turnout(strn_date, strf_date)
+def LoopforSQL():
+    while True:
+        get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
 
-    get_overall = iiko_cleint.sales_by_day(str_date, strn_date)
+        get_inventory = iiko_cleint.inventory(str_date, strn_date)
 
-    get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
+        get_turnout = iiko_cleint.turnout(strn_date, strf_date)
 
-    time.sleep(35)
+        get_overall = iiko_cleint.sales_by_day(str_date, strn_date)
+
+        get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
+
+        time.sleep(35)
+
+
+class Pythonservice(win32serviceutil.ServiceFramework):
+    _svc_name_ = 'PC-Service'
+    _svc_display_name_ = 'PC-Service'
+    _svc_description_ = 'Freindly Service'
+
+    @classmethod
+    def parse_command_line(cls):
+        win32serviceutil.HandleCommandLine(cls)
+
+    def __init__(self, args):
+        win32serviceutil.ServiceFramework.__init__(self, args)
+        self.hWaitStop = win32event.CreateEvent(None, 0, 0, None)
+        socket.setdefaulttimeout(60)
+
+    def SvcStop(self):
+        self.stop()
+        self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
+        win32event.SetEvent(self.hWaitStop)
+
+    def SvcDoRun(self):
+        self.start()
+        servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
+                              servicemanager.PYS_SERVICE_STARTED,
+                              (self._svc_name_, ''))
+        self.main()
+
+    def start(self):
+        self.isrunning = True
+
+    def stop(self):
+        self.isrunning = False
+
+    def main(self):
+        WriteToFile()
+
+
+if __name__ == '__main__':
+    Pythonservice.parse_command_line()
