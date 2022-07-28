@@ -42,9 +42,9 @@ def LoopforSQL():
 
 
 class Pythonservice(win32serviceutil.ServiceFramework):
-    _svc_name_ = 'PC-Service'
-    _svc_display_name_ = 'PC-Service'
-    _svc_description_ = 'Freindly Service'
+    _svc_name_ = 'PBItoMYSQL'
+    _svc_display_name_ = 'PTM'
+    _svc_description_ = 'Service for transferring data from IIKO to MYSQL and Then to PBI'
 
     @classmethod
     def parse_command_line(cls):
@@ -74,7 +74,7 @@ class Pythonservice(win32serviceutil.ServiceFramework):
         self.isrunning = False
 
     def main(self):
-        WriteToFile()
+        LoopforSQL()
 
 
 if __name__ == '__main__':
