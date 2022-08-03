@@ -8,7 +8,6 @@ import datetime
 from datetime import date, timedelta
 import time
 from time import sleep
-import pyinstaller
 
 
 IIKO_URL = 'https://bahandi-co.iiko.it'
