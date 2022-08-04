@@ -101,7 +101,17 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = """Insert into sales_by_day(department) values('') on duplicate key update date = date"""
+            error_handle = """INSERT INTO sales_by_day
+  (department, date, sales)
+SELECT
+   'test', NULL, '1'
+FROM
+  dual
+WHERE NOT EXISTS
+      ( SELECT *  FROM bahandireport.sales_by_day  WHERE (sales, department) = ('1', 'test') )
+  AND NOT EXISTS
+      ( SELECT *  FROM bahandireport.sales_by_day  WHERE (department, date) = ('test',NULL) ) ;
+      """
             c = conn.cursor()
             c.execute(error_handle)
             conn.commit()
@@ -163,7 +173,16 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = """Insert into cost_price(department) values('') on duplicate key update department = department"""
+            error_handle = """INSERT INTO bahandireport.cost_price
+  (date, department, cost_price)
+SELECT
+  NULL, 'test', '1'
+FROM
+  dual
+WHERE NOT EXISTS
+      ( SELECT *  FROM bahandireport.cost_price  WHERE (cost_price, department) = ('1', 'test') )
+  AND NOT EXISTS
+      ( SELECT *  FROM bahandireport.cost_price  WHERE (department, date) = ('test', NULL) ) ;"""
             c = conn.cursor()
             c.execute(error_handle)
             conn.commit()
@@ -210,7 +229,7 @@ class IikoClient:
     </filters>
 </args>""" % (str_date, n_date)
         # '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
-        #             <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
+        #    <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
         try:
             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
                                      headers=self.headers, data=payload)
@@ -228,7 +247,17 @@ class IikoClient:
 
         except Exception as e:
             print('exception error   ', e, end='\n\n#############################\n')
-            error_handle = """Insert into aggr_sales(department) values('') on duplicate key update i = i"""
+            error_handle = """INSERT INTO aggr_sales
+  (date, department, cash_sum, paytype)
+SELECT
+  NULL, 'test', '1', 'test1'
+FROM
+  dual
+WHERE NOT EXISTS
+      ( SELECT *  FROM bahandireport.aggr_sales  WHERE (cash_sum, department) = ('1', 'test') )
+  AND NOT EXISTS
+      ( SELECT *  FROM bahandireport.aggr_sales  WHERE (department, paytype) = ('test', 'test1') ) ;
+      """
             c = conn.cursor()
             c.execute(error_handle)
             conn.commit()
