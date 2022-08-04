@@ -228,8 +228,8 @@ WHERE NOT EXISTS
         </v>
     </filters>
 </args>""" % (str_date, n_date)
-        # '<from cls="java.util.Date">2022-05-01T00:00:00.000+06:00</from>
-        #    <to cls="java.util.Date">2022-06-21T00:00:00.000+06:00</to>'
+        # '<from cls="java.util.Date">2022-07-24T00:00:00.000+06:00</from>
+        #    <to cls="java.util.Date">2022-08-02T00:00:00.000+06:00</to>'
         try:
             response = requests.post(self.host + '/resto/services/olapReport?methodName=buildReport',
                                      headers=self.headers, data=payload)
