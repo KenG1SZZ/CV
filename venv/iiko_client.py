@@ -67,7 +67,7 @@ class IikoClient:
             <from cls="java.util.Date">%s</from>
             <to cls="java.util.Date">%s</to>
             <includeLow>true</includeLow>
-            <includeHigh>false</includeHigh>
+            <includeHigh>true</includeHigh>
         </v>
         <k>DeletedWithWriteoff</k>
         <v cls="FilterIncludeValuesCriteria">
@@ -83,7 +83,7 @@ class IikoClient:
         </v>
     </filters>
 </args>""" \
-                   % (str_date, n_date)
+                  %(str_date, n_date)
 
         response = requests.post(
             self.host + '/resto/services/olapReport?methodName=buildReport',
@@ -141,7 +141,7 @@ WHERE NOT EXISTS
             <from cls="java.util.Date">%s</from>
             <to cls="java.util.Date">%s</to>
             <includeLow>true</includeLow>
-            <includeHigh>false</includeHigh>
+            <includeHigh>true</includeHigh>
         </v>
         <k>DeletedWithWriteoff</k>
         <v cls="FilterIncludeValuesCriteria">
@@ -151,6 +151,7 @@ WHERE NOT EXISTS
         </v>
         <k>OrderDeleted</k>
         <v cls="FilterIncludeValuesCriteria">
+        
             <values>
                 <i cls="OrderDeletionStatus">NOT_DELETED</i>
             </values>
@@ -212,7 +213,7 @@ WHERE NOT EXISTS
             <from cls="java.util.Date">%s</from>
             <to cls="java.util.Date">%s</to>
             <includeLow>true</includeLow>
-            <includeHigh>false</includeHigh>
+            <includeHigh>true</includeHigh>
         </v>
         <k>DeletedWithWriteoff</k>
         <v cls="FilterIncludeValuesCriteria">

@@ -8,26 +8,26 @@ import datetime
 from datetime import date, timedelta
 import time
 from time import sleep
-
+import schedule
 
 IIKO_URL = 'https://bahandi-co.iiko.it'
 IIKO_LOGIN = 'Keng1'
-IIKO_PASSWORD = '37a7d5806f9d502b67bc96109eaa91918ac1d53b'
+IIKO_PASSWORD = '48efc4851e15940af5d477d3c0ce99211a70a3be'
 
 iiko_log = IikoServer(IIKO_URL, IIKO_LOGIN, IIKO_PASSWORD)
 IIKO_VERSION = iiko_log.get_version()
 IIKO_TOKEN = iiko_log.auth()
 
 iiko_cleint = IikoClient(IIKO_URL, IIKO_LOGIN, IIKO_PASSWORD, IIKO_VERSION, IIKO_TOKEN)
-todaydate = date.today() - timedelta(days=1)
-nextdate = date.today()
-futuredate = date.today() + timedelta(days=1)
+todaydate = date.today()
+nextdate = date.today() + timedelta(days=1)
+futuredate = date.today() - timedelta(days=1)
 str_date = todaydate.strftime("%Y-%m-%d")
 strn_date = nextdate.strftime("%Y-%m-%d")
 strf_date = futuredate.strftime("%Y-%m-%d")
 
-while True:
 
+def job():
     get_aggr = iiko_cleint.casshift_by_aggregators(str_date, strn_date)
 
     get_inventory = iiko_cleint.inventory(str_date, strn_date)
@@ -38,6 +38,9 @@ while True:
 
     get_costp = iiko_cleint.cashshift_report(str_date, strn_date)
 
-    time.sleep(10)
 
+schedule.every(2).minutes.do(job)
 
+while True:
+    schedule.run_pending()
+    time.sleep(1)
